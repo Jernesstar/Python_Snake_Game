@@ -169,46 +169,10 @@ class SnakeGame:
             )
             self.update()
 
+    def winner_screen(self):
+        pass
+
     def run(self):
-        game_over = False
-        game_close = False
-
-        self.snake_head_x = self.width // 2
-        self.snake_head_y = self.height // 2
-
-        delta_x = 0
-        delta_y = 0
-
-        (rand_x, rand_y) = self.rand_x_y()
-
-        while (game_close, game_over) == (False, False):
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    self.end()
-                elif event.type == KEYDOWN:
-                    (delta_x, delta_y) = self.get_directions(event)
-
-            self.change_directions(delta_x, delta_y)
-
-            (self.snake_head_x, self.snake_head_y) = self.check_out_of_bounds(
-                self.snake_head_x, self.snake_head_y
-            )
-            self.snake_pixels.append((self.snake_head_x, self.snake_head_y))
-
-            if len(self.snake_pixels) > self.snake_length:
-                self.snake_pixels.pop(0)
-
-            game_over = self.check_for_game_over(game_over)
-
-            (rand_x, rand_y) = self.when_eat_food(rand_x, rand_y)
-
-            self.game_display.fill(self.white)
-            self.draw_snake()
-            self.draw_fruits([(rand_x, rand_y)])
-            self.print_score(self.snake_length)
-            self.clock.tick(self.snake_speed)
-            self.update()
-
         self.game_over_screen()
 
     def end(self):
