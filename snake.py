@@ -20,7 +20,7 @@ class Snake:
     pixels = []
 
     def __init__(
-        self, name, 
+        self, name: str, 
         display_width, 
         display_height, 
         controls=Controls.KEYS
@@ -36,12 +36,12 @@ class Snake:
         return False
 
     def when_eat_food(self, food_coordinates: list[tuple[int, int]]):
-        for food_x, food_y in food_coordinates:
-            if (self.head_x, self.head_y) == (food_x, food_y):
+        for i, food_x_y in enumerate(food_coordinates):
+            if (self.head_x, self.head_y) == food_x_y:
                 self.score += 1
                 self.length += 1
-                return True
-        return False
+                return i
+        return -1
 
     def check_out_of_bounds(self):
         if self.head_x == self.display_width + 10:
@@ -115,23 +115,21 @@ class Snake:
             elif (self.pixels[-1][0] - self.pixels[-2][0]) == 0:
                 delta_x = -10 if event.key == K_LEFT else 10
                 delta_y = 0
+                """Snake is going right"""
             elif (self.pixels[-1][0] - self.pixels[-2][0]) > 0:
                 delta_x = 10
                 delta_y = 0
 
-        elif event.key in (K_UP, K_DOWN, K_w, K_s):
+        elif event.key in (K_UP, K_DOWN):
             if (self.pixels[-1][1] - self.pixels[-2][1]) < 0:
                 delta_x = 0
                 delta_y = -10
             elif (self.pixels[-1][1] - self.pixels[-2][1]) == 0:
                 delta_x = 0
-                delta_y = -10 if event.key in (K_UP, K_s) else 10
+                delta_y = -10 if event.key == K_UP else 10
             elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
                 delta_x = 0
                 delta_y = 10
-        else:
-            delta_x = 0
-            delta_y = 0
         return (delta_x, delta_y)
         
     def get_directions_wasd(self, event):

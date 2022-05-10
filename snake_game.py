@@ -58,20 +58,28 @@ class SnakeGame:
 
     def draw_snakes(self):
         self.game_display.fill(self.white)
-        for x, y, in self.snake_1.pixels:
-            pygame.draw.rect(
-                self.game_display,
-                self.black,
-                [x, y, 10, 10]
-            )
+
         if self.player_count == 2:
-            for x, y in self.snake_2.pixels:
+            for x, y, in self.snake_1.pixels:
                 pygame.draw.rect(
                     self.game_display,
                     self.black,
                     [x, y, 10, 10]
                 )
-                
+            for x, y in self.snake_2.pixels:
+                pygame.draw.rect(
+                    self.game_display,
+                    self.black,
+                    [x, y, 10, 10]
+                    )
+        else:
+            for x, y, in self.snake_1.pixels:
+                pygame.draw.rect(
+                    self.game_display,
+                    self.black,
+                    [x, y, 10, 10]
+                )
+                    
     def draw_fruits(self, coordinates):
         for x, y in coordinates:
             pygame.draw.rect(
@@ -110,15 +118,14 @@ class SnakeGame:
         self.snake_1.head_y = 250
 
         if self.player_count == 2:
-            self.snake_2.head_x == 230
-            self.snake_2.head_y == 230
             self.snake_2.pixels.append(
-                (self.snake_2.head_x, self.snake_2.head_y)
+                (250, 250)
             )
             
-        
-        delta_x_1, delta_x_2 = 0, 0
-        delta_y_1, delta_y_2 = 0, 0
+        delta_x_1 = 0
+        delta_x_2 = 0
+        delta_y_1 = 0 
+        delta_y_2 = 0
         
         foods = [self.rand_x_y() for _ in range(5)]
         
@@ -127,13 +134,33 @@ class SnakeGame:
                 if event.type == QUIT:
                     game_close = True
                 elif event.type == KEYDOWN:
-                    (delta_x_1, delta_y_1) = self.snake_1.directions(event)
                     if self.player_count == 2:
+                        (delta_x_1, delta_y_1) = self.snake_1.directions(event)
                         (delta_x_2, delta_y_2) = self.snake_2.directions(event)
-            
-            self.snake_1.move(delta_x_1, delta_y_1, foods)
+                    else:
+                        (delta_x_1, delta_y_1) = self.snake_1.directions(event)
+
             if self.player_count == 2:
-                self.snake_1.move(delta_x_2, delta_y_2, foods)
+                (i, snake_1_game_over) = self.snake_1.move(
+                    delta_x_1, delta_y_1, foods)
+
+                (j, snake_2_game_over) = self.snake_2.move(
+                    delta_x_2, delta_y_2, foods)
+
+                if i != -1:
+                    foods.pop(i)
+                    foods.append(self.rand_x_y())
+                if j != -1:
+                    foods.pop(j)
+                    foods.append(self.rand_x_y())
+            else:
+                (i, snake_1_game_over) = self.snake_1.move(
+                    delta_x_1, delta_y_1, foods)
+                    
+                if i != -1:
+                    foods.pop(i) 
+                    foods.append(self.rand_x_y())
+            
             self.draw_snakes()
             self.draw_fruits(foods)
             self.show_scores()

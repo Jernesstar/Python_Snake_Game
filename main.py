@@ -1,5 +1,8 @@
 from snake_game import SnakeGame
 
-if __name__ == '__main__':
-    game = SnakeGame("Jercy", "Will")
+def main():
+    game = SnakeGame("Jercy")
     game.play()
+    
+if __name__ == '__main__':
+    main()
