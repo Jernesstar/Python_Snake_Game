@@ -1,21 +1,17 @@
+
 from random import randrange
 import pygame
 from pygame import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, QUIT
+
+from snake import Controls
+from snake import Snake
 
 pygame.init()
 pygame.display.set_caption("Snake Game")
 
 
 class SnakeGame:
-
-    snake_length = 1
-    snake_size = 10
-    snake_speed = 15
-    snake_head_x = 0
-    snake_head_y = 0
-    snake_pixels: list[tuple] = []
-
-    score = 0
+    
     width, height = 700, 500
     white = (255, 255, 255)
     black = (0, 0, 0)
@@ -23,140 +19,74 @@ class SnakeGame:
     orange = (255, 165, 0)
 
     message_font = pygame.font.SysFont("arial", 30)
-    score_font = pygame.font.SysFont("arial", 25)
+    score_font = pygame.font.SysFont("arial", 20)
 
-    def __init__(self):
+    def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
-        self.game_display = pygame.display.set_mode((self.width, self.height))
+        self.game_display = pygame.display.set_mode(
+            (self.width, self.height)
+        )
         self.game_display.fill(self.white)
         pygame.display.update()
+        
+        self.snake_1 = Snake(
+            name_1, self.width, self.height, Controls.KEYS
+        )
+        
+        if name_2 != "":
+            self.snake_2 = Snake(
+                name_2, self.width, self.height, Controls.WASD
+            )
+        self.player_count = 2 if name_2 != "" else 1
 
     def update(self):
         pygame.display.update()
 
-    def print_score(self, score: int) -> None:
-        text = self.score_font.render(f"Score: {score}", True, self.orange)
-        self.game_display.blit(text, [0, 0])
+    def show_scores(self):
+        text_1 = self.score_font.render(
+            f"{self.snake_1.name}'s score: {self.snake_1.score}",
+            True, self.orange
+        )
+        self.game_display.blit(text_1, [0, 0])
+        
+        if self.player_count == 2:
+            text_2 = self.score_font.render(
+                f"{self.snake_2.name}'s score: {self.snake_2.score}",
+                True, self.orange
+            )
+            self.game_display.blit(text_2, [0, 25])
 
-    def print_time(self, time: int):
-        text = self.score_font.render(f"Time: {time}", True, self.orange)
-        self.game_display.blit(text, [30, 0])
-
-    def draw_snake(self):
-        for x, y in self.snake_pixels:
+    def draw_snakes(self):
+        self.game_display.fill(self.white)
+        for x, y, in self.snake_1.pixels:
             pygame.draw.rect(
                 self.game_display,
                 self.black,
-                [x, y, self.snake_size, self.snake_size],
+                [x, y, 10, 10]
+            )
+        if self.player_count == 2:
+            for x, y in self.snake_2.pixels:
+                pygame.draw.rect(
+                    self.game_display,
+                    self.black,
+                    [x, y, 10, 10]
+                )
+                
+    def draw_fruits(self, coordinates):
+        for x, y in coordinates:
+            pygame.draw.rect(
+                self.game_display, 
+                self.orange, 
+                [x, y, 10, 10]
             )
 
-    def draw_fruits(self, coordinates: list[tuple[int, int]]):
-        for x, y in coordinates:
-            pygame.draw.rect(self.game_display, self.orange, [x, y, 10, 10])
-
     def rand_x_y(self):
-        rand_x = randrange(10, (self.width - 20) / 10.0) * 10.0
-        rand_y = randrange(10, (self.height - 20) / 10.0) * 10.0
-        if (rand_x, rand_y) not in self.snake_pixels:
-            return (rand_x, rand_y)
-        else:
-            return self.rand_x_y()
-
-    def get_directions(self, event: pygame.event) -> tuple[int, int]:
-        """
-        This method returns the directions to go depending on the key
-        press. It also makes sure that the player can not go directly
-        opposite of the direction they are currently going.
-
-        The following if-statement checks that the snake is longer than one
-        pixel:
-        >>> if len(self.snake_pixels) == 1
-
-        as this will prevent an IndexError
-
-        The following line checks if the snake is currently going left
-        >>> self.snake_pixels[-2][0] - self.snake_pixels[-1][0] < 0
-
-        since the current snake head position always will correspond to:
-
-        >>> self.snake_pixels[-1]
-
-        as it will always be the last positions to be appended to
-        self.snake_pixels
-        """
-        delta_x, delta_y = 0, 0
-
-        if len(self.snake_pixels) == 1:
-            if event.key in (K_LEFT, K_RIGHT):
-                delta_x = -10 if event.key == K_LEFT else 10
-                delta_y = 0
-            elif event.key in (K_UP, K_DOWN):
-                delta_x = 0
-                delta_y = -10 if event.key == K_UP else 10
-            return (delta_x, delta_y)
-
-        if event.key in (K_LEFT, K_RIGHT):
-            """Snake is going left"""
-            if (self.snake_pixels[-1][0] - self.snake_pixels[-2][0]) < 0:
-                delta_x = -10
-                delta_y = 0
-                """
-                Snake is currently moving up, so turning either direction
-                is fine 
-                """
-            elif (self.snake_pixels[-1][0] - self.snake_pixels[-2][0]) == 0:
-                delta_x = -10 if event.key == K_LEFT else 10
-                delta_y = 0
-            elif (self.snake_pixels[-1][0] - self.snake_pixels[-2][0]) > 0:
-                delta_x = 10
-                delta_y = 0
-
-        elif event.key in (K_UP, K_DOWN):
-            if (self.snake_pixels[-1][1] - self.snake_pixels[-2][1]) < 0:
-                delta_x = 0
-                delta_y = -10
-            elif (self.snake_pixels[-1][1] - self.snake_pixels[-2][1]) == 0:
-                delta_x = 0
-                delta_y = -10 if event.key == K_UP else 10
-            elif (self.snake_pixels[-1][1] - self.snake_pixels[-2][1]) > 0:
-                delta_x = 0
-                delta_y = 10
-        else:
-            delta_x = 0
-            delta_y = 0
-        return (delta_x, delta_y)
-
-    def change_directions(self, delta_x, delta_y):
-        self.snake_head_x += delta_x
-        self.snake_head_y += delta_y
-
-    def check_for_game_over(self, game_over):
-        if game_over:
-            return True
-        if (self.snake_head_x, self.snake_head_y) in self.snake_pixels[:-1]:
-            return True
-        return False
-
-    def when_eat_food(self, target_x, target_y):
-        if (self.snake_head_x, self.snake_head_y) == (target_x, target_y):
-            self.score += 1
-            self.snake_length += 1
-            return self.rand_x_y()
-        return (target_x, target_y)
-
-    def check_out_of_bounds(self, x, y):
-        if x == -10:
-            x = self.width - 10
-        if x == self.width + 10:
-            x = 10
-        if y == -10:
-            y = self.height - 10
-        if y == self.height + 10:
-            y = 10
-        return (x, y)
+        rand_x = randrange(10, (self.width - 10) / 10.0) * 10.0
+        rand_y = randrange(10, (self.height - 10) / 10.0) * 10.0
+        return (rand_x, rand_y)
 
     def game_over_screen(self):
-        message = f"Game Over! Score: {self.score}"
+        message = f"Game Over! Score: {self.snake_1.score}"
         text = self.score_font.render(message, True, self.orange)
         game_close = False
         while game_close == False:
@@ -165,7 +95,8 @@ class SnakeGame:
                     game_close = True
             self.game_display.fill(self.white)
             self.game_display.blit(
-                text, [(self.width // 2) - 130, (self.height // 2) - 20]
+                text, 
+                [(self.width // 2) - 130, (self.height // 2) - 20]
             )
             self.update()
 
@@ -173,8 +104,42 @@ class SnakeGame:
         pass
 
     def run(self):
-        self.game_over_screen()
+        game_over, game_close = False, False  
+        
+        self.snake_1.head_x = 250
+        self.snake_1.head_y = 250
 
+        if self.player_count == 2:
+            self.snake_2.head_x == 230
+            self.snake_2.head_y == 230
+            self.snake_2.pixels.append(
+                (self.snake_2.head_x, self.snake_2.head_y)
+            )
+            
+        
+        delta_x_1, delta_x_2 = 0, 0
+        delta_y_1, delta_y_2 = 0, 0
+        
+        foods = [self.rand_x_y() for _ in range(5)]
+        
+        while (game_over, game_close) == (False, False):
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    game_close = True
+                elif event.type == KEYDOWN:
+                    (delta_x_1, delta_y_1) = self.snake_1.directions(event)
+                    if self.player_count == 2:
+                        (delta_x_2, delta_y_2) = self.snake_2.directions(event)
+            
+            self.snake_1.move(delta_x_1, delta_y_1, foods)
+            if self.player_count == 2:
+                self.snake_1.move(delta_x_2, delta_y_2, foods)
+            self.draw_snakes()
+            self.draw_fruits(foods)
+            self.show_scores()
+            self.clock.tick(self.snake_1.speed)
+            self.update()
+             
     def end(self):
         pygame.display.quit()
         pygame.quit()
