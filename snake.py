@@ -1,5 +1,7 @@
 import pygame
-from pygame import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_a, K_d, K_s, K_w
+from pygame import (
+    KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_a, K_d, K_s, K_w
+)
 
 class Snake:
 
@@ -48,6 +50,9 @@ class Snake:
         self.head_x += delta_x
         self.head_y += delta_y
 
+    def move_snake(self):
+        pass
+
     def get_directions(self, event: pygame.event) -> tuple[int, int]:
         """
         Return directions to go depending on directional key presses. 
@@ -65,11 +70,10 @@ class Snake:
         >>> self.pixels[-2][0] - self.pixels[-1][0] < 0
 
         since the current snake head position always will correspond to:
-
-        >>> self.pixels[-1]
+        `self.pixels[-1]`
 
         as it will always be the last positions to be appended to
-        self.pixels
+        `self.pixels`
         """
         delta_x, delta_y = 0, 0
 
