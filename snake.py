@@ -1,5 +1,5 @@
 import pygame
-from pygame import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN
+from pygame import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_a, K_d, K_s, K_w
 
 class Snake:
 
@@ -42,33 +42,38 @@ class Snake:
             y = 10
         elif y == 0:
             y = self.display_height - 10
-        self.head_x, self.head_y = x, y
+        return (x, y)
+
+    def change_directions(self, delta_x, delta_y):
+        self.head_x += delta_x
+        self.head_y += delta_y
 
     def get_directions(self, event: pygame.event) -> tuple[int, int]:
         """
-        This method returns the directions to go depending on the key
-        press. It also makes sure that the player can not go directly
+        Return directions to go depending on directional key presses. 
+        
+        Also makes sure the player can not go directly
         opposite of the direction they are currently going.
 
         The following if-statement checks that the snake is longer than one
         pixel:
-        >>> if len(self.snake_pixels) == 1
+        >>> if len(self.pixels) == 1
 
-        as this will prevent an IndexError
+        so as this will prevent an IndexError
 
         The following line checks if the snake is currently going left
-        >>> self.snake_pixels[-2][0] - self.snake_pixels[-1][0] < 0
+        >>> self.pixels[-2][0] - self.pixels[-1][0] < 0
 
         since the current snake head position always will correspond to:
 
-        >>> self.snake_pixels[-1]
+        >>> self.pixels[-1]
 
         as it will always be the last positions to be appended to
-        self.snake_pixels
+        self.pixels
         """
         delta_x, delta_y = 0, 0
 
-        if len(self.snake_pixels) == 1:
+        if len(self.pixels) == 1:
             if event.key in (K_LEFT, K_RIGHT):
                 delta_x = -10 if event.key == K_LEFT else 10
                 delta_y = 0
@@ -77,30 +82,30 @@ class Snake:
                 delta_y = -10 if event.key == K_UP else 10
             return (delta_x, delta_y)
 
-        if event.key in (K_LEFT, K_RIGHT):
+        if event.key in (K_LEFT, K_RIGHT, K_a, K_d):
             """Snake is going left"""
-            if (self.snake_pixels[-1][0] - self.snake_pixels[-2][0]) < 0:
+            if (self.pixels[-1][0] - self.pixels[-2][0]) < 0:
                 delta_x = -10
                 delta_y = 0
                 """
-                Snake is currently moving up, so turning either direction
-                is fine 
+                Snake is currently moving up, so turning either 
+                direction is fine 
                 """
-            elif (self.snake_pixels[-1][0] - self.snake_pixels[-2][0]) == 0:
-                delta_x = -10 if event.key == K_LEFT else 10
+            elif (self.pixels[-1][0] - self.pixels[-2][0]) == 0:
+                delta_x = -10 if event.key in (K_LEFT, K_a) else 10
                 delta_y = 0
-            elif (self.snake_pixels[-1][0] - self.snake_pixels[-2][0]) > 0:
+            elif (self.pixels[-1][0] - self.pixels[-2][0]) > 0:
                 delta_x = 10
                 delta_y = 0
 
-        elif event.key in (K_UP, K_DOWN):
-            if (self.snake_pixels[-1][1] - self.snake_pixels[-2][1]) < 0:
+        elif event.key in (K_UP, K_DOWN, K_w, K_s):
+            if (self.pixels[-1][1] - self.pixels[-2][1]) < 0:
                 delta_x = 0
                 delta_y = -10
-            elif (self.snake_pixels[-1][1] - self.snake_pixels[-2][1]) == 0:
+            elif (self.pixels[-1][1] - self.pixels[-2][1]) == 0:
                 delta_x = 0
-                delta_y = -10 if event.key == K_UP else 10
-            elif (self.snake_pixels[-1][1] - self.snake_pixels[-2][1]) > 0:
+                delta_y = -10 if event.key in (K_UP, K_s) else 10
+            elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
                 delta_x = 0
                 delta_y = 10
         else:
