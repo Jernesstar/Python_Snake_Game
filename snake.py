@@ -45,13 +45,13 @@ class Snake:
 
     def check_out_of_bounds(self):
         if self.head_x == self.display_width + 10:
-            self.head_x = 10
+            self.head_x = 0
         elif self.head_x == -10:
-            self.head_x = self.display_width - 10
+            self.head_x = self.display_width
         elif self.head_y == self.display_height:
-            self.head_y = 10
+            self.head_y = 0
         elif self.head_y == -10:
-            self.head_y = self.display_height - 10
+            self.head_y = self.display_height
             
     def move(self, delta_x, delta_y, food_coordinates):
         self.head_x += delta_x

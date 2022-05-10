@@ -116,11 +116,6 @@ class SnakeGame:
         
         self.snake_1.head_x = 250
         self.snake_1.head_y = 250
-
-        if self.player_count == 2:
-            self.snake_2.pixels.append(
-                (250, 250)
-            )
             
         delta_x_1 = 0
         delta_x_2 = 0
@@ -164,7 +159,7 @@ class SnakeGame:
             self.draw_snakes()
             self.draw_fruits(foods)
             self.show_scores()
-            self.clock.tick(self.snake_1.speed)
+            self.clock.tick(15)
             self.update()
              
     def end(self):
