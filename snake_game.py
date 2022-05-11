@@ -3,15 +3,15 @@ from random import randrange
 import pygame
 from pygame import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, QUIT
 
-from snake import Controls
-from snake import Snake
+from snake import Snake, Controls
+from game_modes import OnePlayer_Classic_Snake
 
 pygame.init()
 pygame.display.set_caption("Snake Game")
 
 
 class SnakeGame:
-    
+
     width, height = 700, 500
     white = (255, 255, 255)
     black = (0, 0, 0)
@@ -32,22 +32,20 @@ class SnakeGame:
         self.snake_1 = Snake(
             name_1, self.width, self.height, Controls.KEYS
         )
-        
         if name_2 != "":
             self.snake_2 = Snake(
                 name_2, self.width, self.height, Controls.WASD
             )
         self.player_count = 2 if name_2 != "" else 1
 
+        self.classic_snake = OnePlayer_Classic_Snake(
+            snake=self.snake_1, 
+            clock=self.clock, 
+            game_display=self.game_display  
+        )
+
     def update(self):
         pygame.display.update()
-
-    def show_scores(self):
-        text_1 = self.score_font.render(
-            f"{self.snake_1.name}'s score: {self.snake_1.score}",
-            True, self.orange
-        )
-        self.game_display.blit(text_1, [0, 0])
         
         if self.player_count == 2:
             text_2 = self.score_font.render(
@@ -110,57 +108,6 @@ class SnakeGame:
 
     def winner_screen(self):
         pass
-
-    def run(self):
-        game_over, game_close = False, False  
-        
-        self.snake_1.head_x = 250
-        self.snake_1.head_y = 250
-            
-        delta_x_1 = 0
-        delta_x_2 = 0
-        delta_y_1 = 0 
-        delta_y_2 = 0
-        
-        foods = [self.rand_x_y() for _ in range(5)]
-        
-        while (game_over, game_close) == (False, False):
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    game_close = True
-                elif event.type == KEYDOWN:
-                    if self.player_count == 2:
-                        (delta_x_1, delta_y_1) = self.snake_1.directions(event)
-                        (delta_x_2, delta_y_2) = self.snake_2.directions(event)
-                    else:
-                        (delta_x_1, delta_y_1) = self.snake_1.directions(event)
-
-            if self.player_count == 2:
-                (i, snake_1_game_over) = self.snake_1.move(
-                    delta_x_1, delta_y_1, foods)
-
-                (j, snake_2_game_over) = self.snake_2.move(
-                    delta_x_2, delta_y_2, foods)
-
-                if i != -1:
-                    foods.pop(i)
-                    foods.append(self.rand_x_y())
-                if j != -1:
-                    foods.pop(j)
-                    foods.append(self.rand_x_y())
-            else:
-                (i, snake_1_game_over) = self.snake_1.move(
-                    delta_x_1, delta_y_1, foods)
-                    
-                if i != -1:
-                    foods.pop(i) 
-                    foods.append(self.rand_x_y())
-            
-            self.draw_snakes()
-            self.draw_fruits(foods)
-            self.show_scores()
-            self.clock.tick(15)
-            self.update()
              
     def end(self):
         pygame.display.quit()
@@ -168,5 +115,5 @@ class SnakeGame:
         quit()
 
     def play(self):
-        self.run()
+        self.classic_snake.run()
         self.end()

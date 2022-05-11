@@ -35,13 +35,20 @@ class Snake:
             return True 
         return False
 
-    def when_eat_food(self, food_coordinates: list[tuple[int, int]]):
-        for i, food_x_y in enumerate(food_coordinates):
-            if (self.head_x, self.head_y) == food_x_y:
+    def when_eat_food(self, food_coordinates):
+        if isinstance(food_coordinates, list):
+            for i, food_x_y in enumerate(food_coordinates):
+                if (self.head_x, self.head_y) == food_x_y:
+                    self.score += 1
+                    self.length += 1
+                    return i
+            return -1
+        elif isinstance(food_coordinates, tuple):
+            if (self.head_x, self.head_y) == food_coordinates:
                 self.score += 1
                 self.length += 1
-                return i
-        return -1
+                return True
+            return False
 
     def check_out_of_bounds(self):
         if self.head_x == self.display_width + 10:
