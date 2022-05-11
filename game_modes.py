@@ -5,7 +5,7 @@ from snake import Snake
 
 pygame.init()
 
-class Game_Mode:
+class Game_Mode(object):
 
     snake: Snake
     clock: pygame.time.Clock
@@ -20,18 +20,16 @@ class Game_Mode:
 
     message_font = pygame.font.SysFont("arial", 30)
     score_font = pygame.font.SysFont("arial", 20)
-    
+
     def __init__(
         self, 
-        snake: Snake, 
-        clock: pygame.time.Clock, 
-        game_display: pygame.Surface
+        game
     ):
-        self.snake = snake
-        self.clock = clock
-        self.game_display = game_display
-        self.display_width = snake.display_width
-        self.display_height = snake.display_height
+        self.snake = game.snake_1
+        self.clock = game.clock
+        self.game_display = game.game_display
+        self.display_width = game.snake_1.display_width
+        self.display_height = game.snake_1.display_height
     
     def run(self):
         pass
@@ -74,7 +72,8 @@ class Game_Mode:
     def rand_x_y(self):
         rand_x = randrange(10, (self.display_width - 10) / 10.0) * 10.0
         rand_y = randrange(10, (self.display_height - 10) / 10.0) * 10.0
-        if (rand_x, rand_y) not in self.snake.pixels:
+        if (rand_x, rand_y) not in self.snake.pixels and \
+            (rand_x, rand_y) != (self.snake.head_x, self.snake.head_y):
             return (rand_x, rand_y)
         else:
             return self.rand_x_y()
@@ -101,11 +100,9 @@ class OnePlayer_Classic_Snake(Game_Mode):
     def run(self):
         game_over, game_close = False, False  
         
-        self.snake.head_x = self.snake.display_width // 2
-        self.snake.head_y = self.snake.display_height // 2
-        self.snake.length = 80
+        (self.snake.head_x, self.snake.head_y) = self.rand_x_y()
             
-        delta_x, delta_y = 10, 0
+        delta_x, delta_y = 0, 0
         
         food_x_y = self.rand_x_y()
         
@@ -140,17 +137,23 @@ class TwoPlayer_Timed_Snake(Game_Mode):
 
     def __init__(
         self, 
-        snake_1: Snake, 
-        snake_2: Snake,
-        clock: pygame.time.Clock, 
-        game_display: pygame.Surface
+        game
     ):
-        self.snake_1 = snake_1
-        self.snake_2 = snake_2
-        self.clock = clock
-        self.game_display = game_display
-        self.display_width = snake_1.display_width
-        self.display_height = snake_1.display_height
+        self.snake_1 = game.snake_1
+        self.snake_2 = game.snake_2
+        self.clock = game.clock
+        self.game_display = game.game_display
+        self.display_width = game.snake_1.display_width
+        self.display_height = game.snake_1.display_height
+
+    def rand_x_y(self):
+        rand_x = randrange(10, (self.display_width - 10) / 10.0) * 10.0
+        rand_y = randrange(10, (self.display_height - 10) / 10.0) * 10.0
+        if (rand_x, rand_y) not in self.snake_1.pixels and \
+            (rand_x, rand_y) not in self.snake_2.pixels:
+            return (rand_x, rand_y)
+        else:
+            return self.rand_x_y()
 
     def draw_snakes(self):
         self.game_display.fill(self.white)
@@ -190,11 +193,8 @@ class TwoPlayer_Timed_Snake(Game_Mode):
     def run(self):
         game_over, game_close = False, False  
         
-        self.snake_1.head_x = (self.display_width // 2)
-        self.snake_1.head_y = (self.display_height // 2)
-        
-        self.snake_2.head_x = (self.display_width // 2) - 10
-        self.snake_2.head_y = (self.display_height // 2) + 10
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
+        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
             
         delta_x_1, delta_y_1 = 0, 0
         delta_x_2, delta_y_2 = 0, 0

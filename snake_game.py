@@ -4,6 +4,7 @@ from pygame import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, QUIT
 
 from snake import Snake, Controls
 from game_modes import (
+    Game_Mode,
     OnePlayer_Classic_Snake,
     TwoPlayer_Timed_Snake
 )
@@ -14,7 +15,7 @@ pygame.display.set_caption("Snake Game")
 
 class SnakeGame:
 
-    width, height = 300, 300
+    width, height = 500, 500
     white = (255, 255, 255)
     black = (0, 0, 0)
     red = (255, 0, 0)
@@ -38,20 +39,10 @@ class SnakeGame:
             self.snake_2 = Snake(
                 name_2, self.width, self.height, Controls.WASD
             )
-        self.player_count = 2 if name_2 != "" else 1
+            self.two_player_snake = TwoPlayer_Timed_Snake(self)
 
-        self.classic_snake = OnePlayer_Classic_Snake(
-            snake=self.snake_1, 
-            clock=self.clock, 
-            game_display=self.game_display  
-        )
-        self.two_player_timed_snake = TwoPlayer_Timed_Snake(
-            snake_1=self.snake_1,
-            snake_2=self.snake_2,
-            clock=self.clock,
-            game_display=self.game_display
-        )
-             
+        self.classic_snake = OnePlayer_Classic_Snake(self)
+                
     def end(self):
         pygame.display.quit()
         pygame.quit()
@@ -59,5 +50,6 @@ class SnakeGame:
 
     def play(self):
         self.classic_snake.run()
+        self.two_player_snake.run()
         self.end()
 
