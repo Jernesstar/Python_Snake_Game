@@ -16,7 +16,6 @@ class Snake:
     length = 1
     head_x = 0
     head_y = 0
-    name = ""
     pixels = []
 
     def __init__(
@@ -51,13 +50,13 @@ class Snake:
             return False
 
     def check_out_of_bounds(self):
-        if self.head_x == self.display_width + 10:
+        if self.head_x >= self.display_width:
             self.head_x = 0
-        elif self.head_x == -10:
+        elif self.head_x <= -10:
             self.head_x = self.display_width
-        elif self.head_y == self.display_height:
+        elif self.head_y >= self.display_height:
             self.head_y = 0
-        elif self.head_y == -10:
+        elif self.head_y <= -10:
             self.head_y = self.display_height
             
     def move(self, delta_x, delta_y, food_coordinates):
@@ -72,13 +71,13 @@ class Snake:
             self.pixels.pop(0)
         return (food_eaten, game_over)
 
-    def directions(self, event):
+    def directions(self, event, delta_x, delta_y):
         if self.controls == Controls.KEYS:
-            return self.get_directions_keys(event)
+            return self.get_directions_keys(event, delta_x, delta_y)
         elif self.controls == Controls.WASD:
-            return self.get_directions_wasd(event)
+            return self.get_directions_wasd(event, delta_x, delta_y)
    
-    def get_directions_keys(self, event):
+    def get_directions_keys(self, event, delta_x, delta_y):
         """
         Return directions to go depending on directional key presses. 
         
@@ -100,7 +99,6 @@ class Snake:
         as it will always be the last positions to be appended to
         `self.pixels`
         """
-        delta_x, delta_y = 0, 0
         if len(self.pixels) == 1:
             if event.key in (K_LEFT, K_RIGHT):
                 delta_x = -10 if event.key == K_LEFT else 10
@@ -139,13 +137,13 @@ class Snake:
                 delta_y = 10
         return (delta_x, delta_y)
         
-    def get_directions_wasd(self, event):
+    def get_directions_wasd(self, event, delta_x, delta_y):
         delta_x, delta_y = 0, 0
         if len(self.pixels) == 1:
             if event.key in (K_a, K_d):
                 delta_x = -10 if event.key == K_a else 10
                 delta_y = 0
-            elif event.key in (K_w, K_d):
+            elif event.key in (K_w, K_s):
                 delta_x = 0
                 delta_y = -10 if event.key == K_w else 10
             return (delta_x, delta_y)
@@ -172,7 +170,4 @@ class Snake:
             elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
                 delta_x = 0
                 delta_y = 10
-        else:
-            delta_x = 0
-            delta_y = 0
         return (delta_x, delta_y)
