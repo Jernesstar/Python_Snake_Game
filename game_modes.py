@@ -53,7 +53,7 @@ class Game_Mode(object):
         )
         self.game_display.blit(text_1, [0, 0])
 
-    def draw_snake(self):
+    def draw_snakes(self):
         for x, y, in self.snake.pixels:
             pygame.draw.rect(
                 self.game_display,
@@ -110,8 +110,11 @@ class OnePlayer_Classic_Snake(Game_Mode):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.end()
+                # If one snake, allow for KEYS or WASD
                 elif event.type == KEYDOWN:
-                    (delta_x, delta_y) = self.snake.directions(
+                    (delta_x, delta_y) = self.snake.get_directions_keys(
+                        event, delta_x, delta_y)
+                    (delta_x, delta_y) = self.snake.get_directions_wasd(
                         event, delta_x, delta_y)
 
             (food_eaten, game_over) = self.snake.move(
@@ -121,7 +124,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                 food_x_y = self.rand_x_y()
  
             self.game_display.fill(self.white)
-            self.draw_snake()
+            self.draw_snakes()
             self.draw_fruit(food_x_y)
             self.show_scores()
             self.clock.tick(self.snake.speed)
@@ -143,8 +146,8 @@ class TwoPlayer_Timed_Snake(Game_Mode):
         self.snake_2 = game.snake_2
         self.clock = game.clock
         self.game_display = game.game_display
-        self.display_width = game.snake_1.display_width
-        self.display_height = game.snake_1.display_height
+        self.display_width = game.width
+        self.display_height = game.height
 
     def rand_x_y(self):
         rand_x = randrange(10, (self.display_width - 10) / 10.0) * 10.0
@@ -156,27 +159,14 @@ class TwoPlayer_Timed_Snake(Game_Mode):
             return self.rand_x_y()
 
     def draw_snakes(self):
-        self.game_display.fill(self.white)
         for x, y, in self.snake_1.pixels:
-            pygame.draw.rect(
-                self.game_display,
-                self.black,
-                [x, y, 10, 10]
-            )
+            pygame.draw.rect(self.game_display, self.black, [x, y, 10, 10])
         for x, y, in self.snake_2.pixels:
-            pygame.draw.rect(
-                self.game_display,
-                self.black,
-                [x, y, 10, 10]
-            )
-            
+            pygame.draw.rect(self.game_display, self.black, [x, y, 10, 10])
+        
     def draw_fruits(self, coordinates):
         for x, y in coordinates:
-            pygame.draw.rect(
-                self.game_display, 
-                self.orange, 
-                [x, y, 10, 10]
-            )
+            pygame.draw.rect(self.game_display, self.orange, [x, y, 10, 10])
             
     def show_scores(self):
         text_1 = self.score_font.render(
@@ -205,28 +195,28 @@ class TwoPlayer_Timed_Snake(Game_Mode):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game_close = True
-                elif event.type == KEYDOWN:
+                if event.type == KEYDOWN:
                     (delta_x_1, delta_y_1) = self.snake_1.directions(
                         event, delta_x_1, delta_y_1)
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
 
-            (i, snake_1_game_over) = self.snake_1.move(
+            (i, _) = self.snake_1.move(
                 delta_x_1, delta_y_1, foods)
 
-            (j, snake_2_game_over) = self.snake_2.move(
+            (j, _) = self.snake_2.move(
                 delta_x_2, delta_y_2, foods)
 
             if i != -1:
-                foods.pop(i)
-                foods.append(self.rand_x_y())
+                foods[i] = self.rand_x_y() # If fruit at i eaten, replace
             if j != -1:
-                foods.pop(j)
-                foods.append(self.rand_x_y())
+                foods[i] = self.rand_x_y() # If fruit at j eaten, replace
 
             self.game_display.fill(self.white)
+
             self.draw_snakes()
             self.draw_fruits(foods)
             self.show_scores()
-            self.clock.tick(15)
+
+            self.clock.tick(self.snake_1.speed)
             self.update()

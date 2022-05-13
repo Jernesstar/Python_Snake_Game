@@ -2,9 +2,9 @@ from random import randrange
 import pygame
 from pygame import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, QUIT
 
-from snake import Snake, Controls
+from snake import Snake, Control
+
 from game_modes import (
-    Game_Mode,
     OnePlayer_Classic_Snake,
     TwoPlayer_Timed_Snake
 )
@@ -32,16 +32,12 @@ class SnakeGame:
         self.game_display.fill(self.white)
         pygame.display.update()
         
-        self.snake_1 = Snake(
-            name_1, self.width, self.height, Controls.KEYS
-        )
+        self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
         if name_2 != "":
-            self.snake_2 = Snake(
-                name_2, self.width, self.height, Controls.WASD
-            )
-            self.two_player_snake = TwoPlayer_Timed_Snake(self)
-
-        self.classic_snake = OnePlayer_Classic_Snake(self)
+            self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)
+            self.two_player_snake = TwoPlayer_Timed_Snake(game=self)
+            
+        self.classic_snake = OnePlayer_Classic_Snake(game=self)
                 
     def end(self):
         pygame.display.quit()
@@ -49,7 +45,7 @@ class SnakeGame:
         quit()
 
     def play(self):
-        self.classic_snake.run()
+        # self.classic_snake.run()
         self.two_player_snake.run()
         self.end()
 

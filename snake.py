@@ -3,8 +3,9 @@ from enum import Enum
 from pygame import (
     K_LEFT, K_RIGHT, K_UP, K_DOWN, K_a, K_d, K_w, K_s
 )
+import pygame
 
-class Controls(Enum):
+class Control(Enum):
     KEYS = 1
     WASD = 2
 
@@ -19,14 +20,14 @@ class Snake:
     pixels = []
 
     def __init__(
-        self, name: str, 
-        display_width, 
-        display_height, 
-        controls=Controls.KEYS
+        self,
+        game,
+        name, 
+        controls=Control.KEYS
     ):
         self.name = name.strip()
-        self.display_width = display_width
-        self.display_height = display_height
+        self.display_width = game.width
+        self.display_height = game.height
         self.controls = controls
 
     def check_for_game_over(self):
@@ -72,9 +73,9 @@ class Snake:
         return (food_eaten, game_over)
 
     def directions(self, event, delta_x, delta_y):
-        if self.controls == Controls.KEYS:
+        if self.controls == Control.KEYS:
             return self.get_directions_keys(event, delta_x, delta_y)
-        elif self.controls == Controls.WASD:
+        elif self.controls == Control.WASD:
             return self.get_directions_wasd(event, delta_x, delta_y)
    
     def get_directions_keys(self, event, delta_x, delta_y):
@@ -137,8 +138,7 @@ class Snake:
                 delta_y = 10
         return (delta_x, delta_y)
         
-    def get_directions_wasd(self, event, delta_x, delta_y):
-        delta_x, delta_y = 0, 0
+    def get_directions_wasd(self, event: pygame.event, delta_x, delta_y):
         if len(self.pixels) == 1:
             if event.key in (K_a, K_d):
                 delta_x = -10 if event.key == K_a else 10
