@@ -195,7 +195,7 @@ class TwoPlayer_Timed_Snake(Game_Mode):
         self.game_display.blit(text_2, [0, 25])
         
     def run(self):
-        game_close = False, False  
+        game_close = False
         
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
@@ -208,7 +208,7 @@ class TwoPlayer_Timed_Snake(Game_Mode):
 
         foods = [self.rand_x_y() for _ in range(5)]
         
-        while (game_over_1, game_over_2, game_close) == (False, False):
+        while (game_over_1, game_over_2, game_close) == (False, False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game_close = True
