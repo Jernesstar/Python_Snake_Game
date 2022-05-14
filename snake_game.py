@@ -15,6 +15,9 @@ pygame.display.set_caption("Snake Game")
 
 class SnakeGame:
 
+    snake: Snake
+    snake_2: Snake
+
     width, height = 500, 500
     white = (255, 255, 255)
     black = (0, 0, 0)
@@ -26,9 +29,7 @@ class SnakeGame:
 
     def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
-        self.game_display = pygame.display.set_mode(
-            (self.width, self.height)
-        )
+        self.game_display = pygame.display.set_mode((self.width, self.height))
         self.game_display.fill(self.white)
         pygame.display.update()
         

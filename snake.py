@@ -17,7 +17,7 @@ class Snake:
     length = 1
     head_x = 0
     head_y = 0
-    pixels = []
+    pixels: list[tuple[int, int]] = []
 
     def __init__(
         self,
@@ -49,21 +49,10 @@ class Snake:
                 self.length += 1
                 return True
             return False
-
-    def check_out_of_bounds(self):
-        if self.head_x >= self.display_width:
-            self.head_x = 0
-        elif self.head_x <= -10:
-            self.head_x = self.display_width
-        elif self.head_y >= self.display_height:
-            self.head_y = 0
-        elif self.head_y <= -10:
-            self.head_y = self.display_height
             
     def move(self, delta_x, delta_y, food_coordinates):
         self.head_x += delta_x
         self.head_y += delta_y
-        self.check_out_of_bounds()
         game_over = self.check_for_game_over()
         food_eaten = self.when_eat_food(food_coordinates)
         self.pixels.append((self.head_x, self.head_y))
