@@ -1,3 +1,5 @@
 .env
 resources
 __pycache__
+.vscode
+*_test.py

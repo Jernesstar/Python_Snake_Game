@@ -169,11 +169,13 @@ class TwoPlayer_Timed_Snake(Game_Mode):
         if (rand_x, rand_y) not in self.snake_1.pixels and \
             (rand_x, rand_y) not in self.snake_2.pixels:
             return (rand_x, rand_y)
+        else:
+            return self.rand_x_y()
 
-    def draw_snakes(self):
-        for x, y, in self.snake_2.pixels:
+    def draw_snakes(self, pixels_1, pixels_2):
+        for x, y, in pixels_1:
             pygame.draw.rect(self.game_display, self.black, [x, y, 10, 10])
-        for x, y, in self.snake_2.pixels:
+        for x, y, in pixels_2:
             pygame.draw.rect(self.game_display, self.black, [x, y, 10, 10])
         
     def draw_fruits(self, coordinates):
@@ -193,33 +195,34 @@ class TwoPlayer_Timed_Snake(Game_Mode):
         self.game_display.blit(text_2, [0, 25])
         
     def run(self):
-        game_over, game_close = False, False  
+        game_close = False, False  
         
-        (self.snake_1.head_x, self.snake_1.head_y) = (140, 220)
-        (self.snake_2.head_x, self.snake_2.head_y) = (120, 250)
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
+        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
             
         delta_x_1, delta_y_1 = 0, 0
         delta_x_2, delta_y_2 = 0, 0
-        
+
+        game_over_1 = False
+        game_over_2 = False
+
         foods = [self.rand_x_y() for _ in range(5)]
         
-        while (game_over, game_close) == (False, False):
+        while (game_over_1, game_over_2, game_close) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game_close = True
                 if event.type == KEYDOWN:
-                    (delta_x_1, delta_y_1) = self.snake_1.get_directions_keys(
+                    (delta_x_1, delta_y_1) = self.snake_1.directions(
                         event, delta_x_1, delta_y_1)
-                    (delta_x_2, delta_y_2) = self.snake_2.get_directions_wasd(
+                    (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
 
-            (i, _) = self.snake_1.move(
+            (i, game_over_1) = self.snake_1.move(
                 delta_x_1, delta_y_1, foods)
 
-            (j, _) = self.snake_2.move(
+            (j, game_over_2) = self.snake_2.move(
                 delta_x_2, delta_y_2, foods)
-
-            print(f"Snake 1 {self.snake_1.pixels}, Snake 2 {self.snake_2.pixels}")
 
             if i != -1:
                 # If fruit at i eaten, replace      
@@ -232,7 +235,7 @@ class TwoPlayer_Timed_Snake(Game_Mode):
 
             self.game_display.fill(self.white)
 
-            self.draw_snakes()
+            self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
             self.draw_fruits(foods)
             self.show_scores()
 

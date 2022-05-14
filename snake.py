@@ -17,7 +17,6 @@ class Snake:
     length = 1
     head_x = 0
     head_y = 0
-    pixels: list[tuple[int, int]] = []
 
     def __init__(
         self,
@@ -29,6 +28,7 @@ class Snake:
         self.display_width = game.width
         self.display_height = game.height
         self.controls = controls
+        self.pixels = []
 
     def check_for_game_over(self):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
@@ -78,7 +78,7 @@ class Snake:
         pixel:
         >>> if len(self.pixels) == 1
 
-        so as this will prevent an IndexError
+        so as this will prevent an `IndexError`
 
         The following line checks if the snake is currently going left
         >>> self.pixels[-2][0] - self.pixels[-1][0] < 0
