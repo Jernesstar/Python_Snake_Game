@@ -56,8 +56,8 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        for x in range(0, self.display_width, 10):
-            for y in range(0, self.display_height, 10):
+        for x in range(0, self.display_width, self.snake_1.size):
+            for y in range(0, self.display_height, self.snake_1.size):
                 pygame.draw.rect(
                     self.game_display,
                     colors[0],
@@ -100,9 +100,8 @@ class Game_Mode():
         )
         
     def rand_x_y(self):
-        size = self.snake_1.size
-        rand_x = randrange(size, (self.display_width - size) / size) * size
-        rand_y = randrange(size, (self.display_height - size) / size) * size
+        rand_x = randrange(10, (self.display_width - 10) / 10) * 10
+        rand_y = randrange(10, (self.display_height - 10) / 10) * 10
         if (rand_x, rand_y) not in self.snake_1.pixels and \
             (rand_x, rand_y) != (self.snake_1.head_x, self.snake_1.head_y):
             return (rand_x, rand_y)
@@ -119,8 +118,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
         while game_close == False:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    game_close = True
-
+                    self.end()
             self.game_display.fill(self.white)
             self.tile_background()
 
@@ -196,13 +194,38 @@ class TwoPlayer_Snake(Game_Mode):
 
     def draw_snakes(self, pixels_1, pixels_2):
         for x, y, in pixels_1:
-            pygame.draw.rect(self.game_display, self.black, [x, y, 10, 10])
+            pygame.draw.rect(
+                self.game_display, 
+                self.black, 
+                [x, y, self.snake_1.size, self.snake_1.size]
+            )
         for x, y, in pixels_2:
-            pygame.draw.rect(self.game_display, self.black, [x, y, 10, 10])
+            pygame.draw.rect(
+                self.game_display, 
+                self.black, 
+                [x, y, self.snake_2.size, self.snake_2.size]
+            )
         
     def draw_fruits(self, coordinates):
         for x, y in coordinates:
             pygame.draw.rect(self.game_display, self.orange, [x, y, 10, 10])
+    
+    def check_for_out_of_bounds(self):
+        _left_1 = self.snake_1.head_x <= -10
+        _right_1 = self.snake_1.head_x >= self.display_width
+        _up_1 = self.snake_1.head_y <= -10
+        _down_1 = self.snake_1.head_y >= self.display_height
+
+        _left_2 = self.snake_2.head_x >= self.display_width
+        _right_2 = self.snake_2.head_x <= -10
+        _up_2 = self.snake_2.head_y >= self.display_height
+        _down_2 = self.snake_2.head_y <= -10
+
+        if _left_1 or _right_1 or _up_1 or _down_1:
+            return (True, False) # Player_1 lose is True
+        if _left_2 or _right_2 or _up_2 or _down_2:
+            return (False, True) # Player_1 lose is True
+        return (False, False) # No one has gone out of bounds
     
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
@@ -240,9 +263,7 @@ class TwoPlayer_Snake(Game_Mode):
         self.game_display.blit(text_1, [0, 0])
         self.game_display.blit(text_2, [0, 25])
         
-    def run(self):
-        game_close = False
-        
+    def run(self):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
             
@@ -254,10 +275,10 @@ class TwoPlayer_Snake(Game_Mode):
 
         foods = [self.rand_x_y() for _ in range(5)]
         
-        while (game_over_1, game_over_2, game_close) == (False, False, False):
+        while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    game_close = True
+                    self.end()
                 if event.type == KEYDOWN:
                     (delta_x_1, delta_y_1) = self.snake_1.directions(
                         event, delta_x_1, delta_y_1)
@@ -269,6 +290,8 @@ class TwoPlayer_Snake(Game_Mode):
 
             (j, game_over_2) = self.snake_2.move(
                 delta_x_2, delta_y_2, foods)
+
+            (game_over_1, game_over_2) = self.check_for_out_of_bounds()
 
             if i != -1:
                 # If fruit at i eaten, replace      
