@@ -1,16 +1,19 @@
 from random import randrange
+from itertools import cycle
+
 import pygame
 from pygame import QUIT, KEYDOWN
 from pygame import (
     K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d
 )
+
 from snake import Snake
 
 pygame.init()
 
-class Game_Mode(object):
+class Game_Mode():
 
-    snake: Snake
+    snake_1: Snake
     clock: pygame.time.Clock
     game_display: pygame.Surface
 
@@ -20,6 +23,8 @@ class Game_Mode(object):
     black = (0, 0, 0)
     red = (255, 0, 0)
     orange = (255, 165, 0)
+    light_green = (0, 250, 0)
+    dark_green = (0, 130, 0)
 
     message_font = pygame.font.SysFont("arial", 30)
     score_font = pygame.font.SysFont("arial", 20)
@@ -28,7 +33,7 @@ class Game_Mode(object):
         self, 
         game
     ):
-        self.snake = game.snake_1
+        self.snake_1 = game.snake_1
         self.clock = game.clock
         self.game_display = game.game_display
         self.display_width = game.snake_1.display_width
@@ -48,30 +53,42 @@ class Game_Mode(object):
         pygame.display.quit()
         pygame.quit()
         quit()
+
+    def tile_background(self):
+        colors = [self.light_green, self.dark_green]
+        for x in range(0, self.display_width, 10):
+            for y in range(0, self.display_height, 10):
+                pygame.draw.rect(
+                    self.game_display,
+                    colors[0],
+                    [x, y, self.snake_1.size, self.snake_1.size]
+                )
+                colors.reverse()
+            colors.reverse()
     
     def check_for_out_of_bounds(self):
-        if self.snake.head_x >= self.display_width:
-            self.snake.head_x = 0
-        elif self.snake.head_x <= -10:
-            self.snake.head_x = self.display_width
-        elif self.snake.head_y >= self.display_height:
-            self.snake.head_y = 0
-        elif self.snake.head_y <= -10:
-            self.snake.head_y = self.display_height
+        if self.snake_1.head_x >= self.display_width:
+            self.snake_1.head_x = 0
+        elif self.snake_1.head_x <= -10:
+            self.snake_1.head_x = self.display_width
+        elif self.snake_1.head_y >= self.display_height:
+            self.snake_1.head_y = 0
+        elif self.snake_1.head_y <= -10:
+            self.snake_1.head_y = self.display_height
 
     def show_scores(self):
         text_1 = self.score_font.render(
-            f"{self.snake.name}'s score: {self.snake.score}",
-            True, self.orange
+            f"{self.snake_1.name}'s score: {self.snake_1.score}",
+            True, self.black
         )
         self.game_display.blit(text_1, [0, 0])
 
-    def draw_snake(self):
-        for x, y, in self.snake.pixels:
+    def draw_snake(self, pixels):
+        for x, y, in pixels:
             pygame.draw.rect(
                 self.game_display,
                 self.black,
-                [x, y, 10, 10]
+                [x, y, self.snake_1.size, self.snake_1.size]
             )
 
     def draw_fruit(self, coordinates):
@@ -79,14 +96,15 @@ class Game_Mode(object):
         pygame.draw.rect(
             self.game_display, 
             self.orange, 
-            [x, y, 10, 10]
+            [x, y, self.snake_1.size, self.snake_1.size]
         )
         
     def rand_x_y(self):
-        rand_x = randrange(10, (self.display_width - 10) / 10.0) * 10.0
-        rand_y = randrange(10, (self.display_height - 10) / 10.0) * 10.0
-        if (rand_x, rand_y) not in self.snake.pixels and \
-            (rand_x, rand_y) != (self.snake.head_x, self.snake.head_y):
+        size = self.snake_1.size
+        rand_x = randrange(size, (self.display_width - size) / size) * size
+        rand_y = randrange(size, (self.display_height - size) / size) * size
+        if (rand_x, rand_y) not in self.snake_1.pixels and \
+            (rand_x, rand_y) != (self.snake_1.head_x, self.snake_1.head_y):
             return (rand_x, rand_y)
         else:
             return self.rand_x_y()
@@ -94,15 +112,18 @@ class Game_Mode(object):
 class OnePlayer_Classic_Snake(Game_Mode):
 
     def game_over_screen(self):
-        message = f"Game Over! Score: {self.snake.score}"
-        text = self.score_font.render(message, True, self.orange)
+        message = f"Game Over! Score: {self.snake_1.score}"
+        text = self.score_font.render(message, True, self.black)
 
         game_close = False
         while game_close == False:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game_close = True
+
             self.game_display.fill(self.white)
+            self.tile_background()
+
             self.game_display.blit(
                 text, 
                 [(self.display_width // 2) - 100, 
@@ -112,11 +133,10 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
     def run(self):
         game_over, game_close = False, False  
-        
-        (self.snake.head_x, self.snake.head_y) = self.rand_x_y()
-            
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y() 
+
         delta_x, delta_y = 0, 0
-        
+
         food_x_y = self.rand_x_y()
         
         while (game_over, game_close) == (False, False):
@@ -125,29 +145,32 @@ class OnePlayer_Classic_Snake(Game_Mode):
                     self.end()
                 # If one snake, allow for KEYS or WASD
                 elif event.type == KEYDOWN:
-                    (delta_x, delta_y) = self.snake.get_directions_keys(
+                    (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
-                    (delta_x, delta_y) = self.snake.get_directions_wasd(
+                    (delta_x, delta_y) = self.snake_1.get_directions_wasd(
                         event, delta_x, delta_y)
 
-            (food_eaten, game_over) = self.snake.move(
+            (food_eaten, game_over) = self.snake_1.move(
                 delta_x, delta_y, food_x_y)
+
             self.check_for_out_of_bounds()
 
             if food_eaten:
                 food_x_y = self.rand_x_y()
  
             self.game_display.fill(self.white)
-            self.draw_snake()
+            self.tile_background()
+
+            self.draw_snake(self.snake_1.pixels)
             self.draw_fruit(food_x_y)
             self.show_scores()
-            self.clock.tick(self.snake.speed)
+            self.clock.tick(self.snake_1.speed)
             self.update()
 
         self.game_over_screen()
 
 
-class TwoPlayer_Timed_Snake(Game_Mode):
+class TwoPlayer_Snake(Game_Mode):
 
     snake_1: Snake
     snake_2: Snake
@@ -164,8 +187,7 @@ class TwoPlayer_Timed_Snake(Game_Mode):
         self.display_height = game.height
 
     def rand_x_y(self):
-        rand_x = randrange(10, (self.display_width - 10) / 10.0) * 10.0
-        rand_y = randrange(10, (self.display_height - 10) / 10.0) * 10.0
+        (rand_x, rand_y) = super().rand_x_y()
         if (rand_x, rand_y) not in self.snake_1.pixels and \
             (rand_x, rand_y) not in self.snake_2.pixels:
             return (rand_x, rand_y)
@@ -181,15 +203,39 @@ class TwoPlayer_Timed_Snake(Game_Mode):
     def draw_fruits(self, coordinates):
         for x, y in coordinates:
             pygame.draw.rect(self.game_display, self.orange, [x, y, 10, 10])
+    
+    def winner_screen(self, snake_1_game_over: bool):
+        (winner_name, winner_score) = (
+            self.snake_1.name if not snake_1_game_over else self.snake_2.name,
+            self.snake_2.score if not snake_1_game_over else self.snake_2.score
+        )
+        message = f"{winner_name} wins, score {winner_score}"
+        text = self.score_font.render(
+            message, True, self.black)
+
+        game_close = False
+        while game_close == False:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    game_close = True
+            self.game_display.fill(self.white)
+            self.tile_background()
+
+            self.game_display.blit(
+                text, 
+                [(self.display_width // 2) - 85, 
+                (self.display_height // 2) - 20]
+            )
+            self.update()
             
     def show_scores(self):
         text_1 = self.score_font.render(
             f"{self.snake_1.name}'s score: {self.snake_1.score}",
-            True, self.orange
+            True, self.black
         )
         text_2 = self.score_font.render(
             f"{self.snake_2.name}'s score: {self.snake_2.score}",
-            True, self.orange
+            True, self.black
         )
         self.game_display.blit(text_1, [0, 0])
         self.game_display.blit(text_2, [0, 25])
@@ -234,6 +280,7 @@ class TwoPlayer_Timed_Snake(Game_Mode):
                 foods.append(self.rand_x_y()) 
 
             self.game_display.fill(self.white)
+            self.tile_background()
 
             self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
             self.draw_fruits(foods)
@@ -241,3 +288,5 @@ class TwoPlayer_Timed_Snake(Game_Mode):
 
             self.clock.tick(self.snake_1.speed)
             self.update()
+
+        self.winner_screen(snake_1_game_over=game_over_1)

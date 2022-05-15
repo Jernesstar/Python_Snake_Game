@@ -6,7 +6,7 @@ from snake import Snake, Control
 
 from game_modes import (
     OnePlayer_Classic_Snake,
-    TwoPlayer_Timed_Snake
+    TwoPlayer_Snake
 )
 
 pygame.init()
@@ -36,7 +36,7 @@ class SnakeGame:
         self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
         if name_2 != "":
             self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)
-            self.two_player_snake = TwoPlayer_Timed_Snake(game=self)
+            self.two_player_snake = TwoPlayer_Snake(game=self)
             
         self.classic_snake = OnePlayer_Classic_Snake(game=self)
                 
