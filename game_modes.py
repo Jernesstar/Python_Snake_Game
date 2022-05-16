@@ -1,11 +1,7 @@
 from random import randrange
-from itertools import cycle
 
 import pygame
 from pygame import QUIT, KEYDOWN
-from pygame import (
-    K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d
-)
 
 from snake import Snake
 
@@ -17,7 +13,7 @@ class Game_Mode():
     clock: pygame.time.Clock
     game_display: pygame.Surface
 
-    display_width, display_height = 700, 500
+    display_width, display_height = 600, 600
 
     white = (255, 255, 255)
     black = (0, 0, 0)
@@ -36,9 +32,11 @@ class Game_Mode():
         self.snake_1 = game.snake_1
         self.clock = game.clock
         self.game_display = game.game_display
-        self.display_width = game.snake_1.display_width
-        self.display_height = game.snake_1.display_height
-    
+        self.display_width = game.width
+        self.display_height = game.height
+        self.display_width += self.display_width % self.snake_1.size
+        self.display_height += self.display_height % self.snake_1.size
+
     def run(self):
         pass
 
@@ -56,6 +54,8 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
+        size_divides_width = self.display_height % self.snake_1.size == 0
+
         for x in range(0, self.display_width, self.snake_1.size):
             for y in range(0, self.display_height, self.snake_1.size):
                 pygame.draw.rect(
@@ -63,8 +63,8 @@ class Game_Mode():
                     colors[0],
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
-                colors.reverse()       
-            for _ in range(self.snake_1.size % 20):
+                colors.reverse() 
+            if size_divides_width:     
                 colors.reverse()
     
     def check_for_out_of_bounds(self, game_over):
@@ -81,8 +81,9 @@ class Game_Mode():
         return False
 
     def show_scores(self):
+        message = f"{self.snake_1.name}'s score: {self.snake_1.score}"
         text_1 = self.score_font.render(
-            f"{self.snake_1.name}'s score: {self.snake_1.score}",
+            message,
             True, self.black
         )
         self.game_display.blit(text_1, [0, 0])
@@ -105,10 +106,9 @@ class Game_Mode():
         
     def rand_x_y(self):
         size = self.snake_1.size
-        rand_x = randrange(10, (self.display_width - 10) // size) * size
-        rand_y = randrange(10, (self.display_height - 10) // size) * size
-        if (rand_x, rand_y) not in self.snake_1.pixels and \
-            (rand_x, rand_y) != (self.snake_1.head_x, self.snake_1.head_y):
+        rand_x = randrange(0, (self.display_width - 10) // size) * size
+        rand_y = randrange(0, (self.display_height - 10) // size) * size
+        if (rand_x, rand_y) not in self.snake_1.pixels:
             return (rand_x, rand_y)
         else:
             return self.rand_x_y()
@@ -116,21 +116,28 @@ class Game_Mode():
 class OnePlayer_Classic_Snake(Game_Mode):
 
     def game_over_screen(self):
-        message = f"Game Over! Score: {self.snake_1.score}"
-        text = self.score_font.render(message, True, self.black)
+        message_1 = f"Game Over! Score: {self.snake_1.score}"
+        message_2 = "Press anywhere to continue"
 
-        game_close = False
-        while game_close == False:
+        text_1 = self.score_font.render(message_1, True, self.black)
+        text_2 = self.score_font.render(message_2, True, self.black)
+
+        while True:
             for event in pygame.event.get():
-                if event.type == QUIT:
+                if event.type in (KEYDOWN, QUIT):
                     self.end()
-            self.game_display.fill(self.white)
             self.tile_background()
 
             self.game_display.blit(
-                text, 
-                [(self.display_width // 2) - 100, 
-                (self.display_height // 2) - 20]
+                text_1, 
+                [(self.display_width // 2) - 120, 
+                (self.display_height // 2) - 25]
+            )
+
+            self.game_display.blit(
+                text_2,
+                [(self.display_width // 2) - 120, 
+                (self.display_height // 2)]
             )
             self.update()
 
@@ -161,7 +168,6 @@ class OnePlayer_Classic_Snake(Game_Mode):
             if food_eaten:
                 food_x_y = self.rand_x_y()
  
-            self.game_display.fill(self.white)
             self.tile_background()
 
             self.draw_snake(self.snake_1.pixels)

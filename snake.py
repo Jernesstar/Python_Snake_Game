@@ -13,7 +13,7 @@ class Snake:
 
     score = 0
     size = 10
-    speed = 15
+    speed = 12
     length = 1
     head_x = 0
     head_y = 0
@@ -134,7 +134,7 @@ class Snake:
                 delta_y = 0
             elif event.key in (K_w, K_s):
                 delta_x = 0
-                delta_y = -self.size if event.key == K_w else 10
+                delta_y = -self.size if event.key == K_w else self.size
             return (delta_x, delta_y)
 
         if event.key in (K_a, K_d):

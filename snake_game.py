@@ -18,11 +18,7 @@ class SnakeGame:
     snake: Snake
     snake_2: Snake
 
-    width, height = 500, 500
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-    red = (255, 0, 0)
-    orange = (255, 165, 0)
+    width, height = 900, 600
 
     message_font = pygame.font.SysFont("arial", 30)
     score_font = pygame.font.SysFont("arial", 20)
@@ -30,7 +26,6 @@ class SnakeGame:
     def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
         self.game_display = pygame.display.set_mode((self.width, self.height))
-        self.game_display.fill(self.white)
         pygame.display.update()
         
         self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
