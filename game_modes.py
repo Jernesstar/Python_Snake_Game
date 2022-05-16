@@ -63,18 +63,22 @@ class Game_Mode():
                     colors[0],
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
+                colors.reverse()       
+            for _ in range(self.snake_1.size % 20):
                 colors.reverse()
-            colors.reverse()
     
-    def check_for_out_of_bounds(self):
+    def check_for_out_of_bounds(self, game_over):
+        if game_over:
+            return True
         if self.snake_1.head_x >= self.display_width:
-            self.snake_1.head_x = 0
-        elif self.snake_1.head_x <= -10:
-            self.snake_1.head_x = self.display_width
+            return True
+        elif self.snake_1.head_x <= -self.snake_1.size:
+            return True
         elif self.snake_1.head_y >= self.display_height:
-            self.snake_1.head_y = 0
-        elif self.snake_1.head_y <= -10:
-            self.snake_1.head_y = self.display_height
+            return True
+        elif self.snake_1.head_y <= -self.snake_1.size:
+            return True
+        return False
 
     def show_scores(self):
         text_1 = self.score_font.render(
@@ -100,8 +104,9 @@ class Game_Mode():
         )
         
     def rand_x_y(self):
-        rand_x = randrange(10, (self.display_width - 10) / 10) * 10
-        rand_y = randrange(10, (self.display_height - 10) / 10) * 10
+        size = self.snake_1.size
+        rand_x = randrange(10, (self.display_width - 10) // size) * size
+        rand_y = randrange(10, (self.display_height - 10) // size) * size
         if (rand_x, rand_y) not in self.snake_1.pixels and \
             (rand_x, rand_y) != (self.snake_1.head_x, self.snake_1.head_y):
             return (rand_x, rand_y)
@@ -151,7 +156,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
             (food_eaten, game_over) = self.snake_1.move(
                 delta_x, delta_y, food_x_y)
 
-            self.check_for_out_of_bounds()
+            game_over = self.check_for_out_of_bounds(game_over)
 
             if food_eaten:
                 food_x_y = self.rand_x_y()

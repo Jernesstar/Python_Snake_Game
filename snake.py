@@ -91,72 +91,72 @@ class Snake:
         """
         if len(self.pixels) == 1:
             if event.key in (K_LEFT, K_RIGHT):
-                delta_x = -10 if event.key == K_LEFT else 10
+                delta_x = -self.size if event.key == K_LEFT else self.size
                 delta_y = 0
             elif event.key in (K_UP, K_DOWN):
                 delta_x = 0
-                delta_y = -10 if event.key == K_UP else 10
+                delta_y = -self.size if event.key == K_UP else self.size
             return (delta_x, delta_y)
 
         if event.key in (K_LEFT, K_RIGHT):
             """Snake is going left"""
             if (self.pixels[-1][0] - self.pixels[-2][0]) < 0:
-                delta_x = -10
+                delta_x = -self.size
                 delta_y = 0
                 """
                 Snake is currently moving up, so turning either 
                 direction is fine 
                 """
             elif (self.pixels[-1][0] - self.pixels[-2][0]) == 0:
-                delta_x = -10 if event.key == K_LEFT else 10
+                delta_x = -self.size if event.key == K_LEFT else self.size
                 delta_y = 0
                 """Snake is going right"""
             elif (self.pixels[-1][0] - self.pixels[-2][0]) > 0:
-                delta_x = 10
+                delta_x = self.size
                 delta_y = 0
 
         elif event.key in (K_UP, K_DOWN):
             if (self.pixels[-1][1] - self.pixels[-2][1]) < 0:
                 delta_x = 0
-                delta_y = -10
+                delta_y = -self.size
             elif (self.pixels[-1][1] - self.pixels[-2][1]) == 0:
                 delta_x = 0
-                delta_y = -10 if event.key == K_UP else 10
+                delta_y = -self.size if event.key == K_UP else self.size
             elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
                 delta_x = 0
-                delta_y = 10
+                delta_y = self.size
         return (delta_x, delta_y)
         
     def get_directions_wasd(self, event: pygame.event, delta_x, delta_y):
         if len(self.pixels) == 1:
             if event.key in (K_a, K_d):
-                delta_x = -10 if event.key == K_a else 10
+                delta_x = -self.size if event.key == K_a else self.size
                 delta_y = 0
             elif event.key in (K_w, K_s):
                 delta_x = 0
-                delta_y = -10 if event.key == K_w else 10
+                delta_y = -self.size if event.key == K_w else 10
             return (delta_x, delta_y)
 
         if event.key in (K_a, K_d):
             """Snake is going left"""
             if (self.pixels[-1][0] - self.pixels[-2][0]) < 0:
-                delta_x = -10
+                delta_x = -self.size
                 delta_y = 0
             elif (self.pixels[-1][0] - self.pixels[-2][0]) == 0:
-                delta_x = -10 if event.key == K_a else 10
+                delta_x = -self.size if event.key == K_a else self.size
                 delta_y = 0
             elif (self.pixels[-1][0] - self.pixels[-2][0]) > 0:
-                delta_x = 10
+                delta_x = self.size
                 delta_y = 0
 
         elif event.key in (K_w, K_s):
             if (self.pixels[-1][1] - self.pixels[-2][1]) < 0:
                 delta_x = 0
-                delta_y = -10
+                delta_y = -self.size
             elif (self.pixels[-1][1] - self.pixels[-2][1]) == 0:
                 delta_x = 0
-                delta_y = -10 if event.key == K_w else 10
+                delta_y = -self.size if event.key == K_w else self.size
             elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
                 delta_x = 0
-                delta_y = 10
+                delta_y = self.size
         return (delta_x, delta_y)

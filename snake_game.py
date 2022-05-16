@@ -34,6 +34,7 @@ class SnakeGame:
         pygame.display.update()
         
         self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
+        self.snake_1.size = 30
     
         if name_2 != "":
             self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)
@@ -47,7 +48,7 @@ class SnakeGame:
         quit()
 
     def play(self):
-        # self.classic_snake.run()
-        self.two_player_snake.run()
+        self.classic_snake.run()
+        # self.two_player_snake.run()
         self.end()
 
