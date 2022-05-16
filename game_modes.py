@@ -226,6 +226,11 @@ class TwoPlayer_Snake(Game_Mode):
         if _left_2 or _right_2 or _up_2 or _down_2:
             return (False, True) # Player_1 lose is True
         return (False, False) # No one has gone out of bounds
+
+    def check_for_game_over(self, game_over_1, game_over_2):
+        if (game_over_1, game_over_2) != (False, False):
+            return (game_over_1, game_over_2)
+        return self.check_for_out_of_bounds()
     
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
@@ -291,7 +296,8 @@ class TwoPlayer_Snake(Game_Mode):
             (j, game_over_2) = self.snake_2.move(
                 delta_x_2, delta_y_2, foods)
 
-            (game_over_1, game_over_2) = self.check_for_out_of_bounds()
+            (game_over_1, game_over_2) = self.check_for_game_over(
+                game_over_1, game_over_2)
 
             if i != -1:
                 # If fruit at i eaten, replace      
