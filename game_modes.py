@@ -1,7 +1,7 @@
 from random import randrange
 
 import pygame
-from pygame import QUIT, KEYDOWN
+from pygame import K_RETURN, QUIT, KEYDOWN
 
 from snake import Snake
 
@@ -54,7 +54,7 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        size_divides_width = self.display_height % self.snake_1.size == 0
+        size_divides_width = self.display_height // 10 % self.snake_1.size == 0
 
         for x in range(0, self.display_width, self.snake_1.size):
             for y in range(0, self.display_height, self.snake_1.size):
@@ -66,6 +66,20 @@ class Game_Mode():
                 colors.reverse() 
             if size_divides_width:     
                 colors.reverse()
+
+    def pause_screen(self):
+        message = "Paused. Press any key to continue"
+        text = self.score_font.render(
+            message, True, self.red
+        )
+        self.tile_background()
+        self.draw_snake(self.snake_1.pixels)
+
+        self.game_display.blit(
+            text, 
+            [(self.display_width // 2) - 150, 
+            (self.display_height // 2) - 25]
+        )
     
     def check_for_out_of_bounds(self, game_over):
         if game_over:
@@ -143,6 +157,8 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
     def run(self):
         game_over, game_close = False, False  
+
+        paused = False
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y() 
 
         delta_x, delta_y = 0, 0
@@ -152,28 +168,35 @@ class OnePlayer_Classic_Snake(Game_Mode):
         while (game_over, game_close) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    self.end()
-                # If one snake, allow for KEYS or WASD
-                elif event.type == KEYDOWN:
-                    (delta_x, delta_y) = self.snake_1.get_directions_keys(
-                        event, delta_x, delta_y)
-                    (delta_x, delta_y) = self.snake_1.get_directions_wasd(
-                        event, delta_x, delta_y)
+                    self.end()          
+                if event.type == KEYDOWN:
+                    if event.key == K_RETURN:
+                        paused = True if not paused else False
+                    elif paused:
+                        paused = False
+                    else:
+                        # If one snake, allow for KEYS or WASD    
+                        (delta_x, delta_y) = self.snake_1.get_directions_keys(
+                            event, delta_x, delta_y)
+                        (delta_x, delta_y) = self.snake_1.get_directions_wasd(
+                            event, delta_x, delta_y)
+            if paused:
+                self.pause_screen()
+            else:
+                (food_eaten, game_over) = self.snake_1.move(
+                    delta_x, delta_y, food_x_y)
 
-            (food_eaten, game_over) = self.snake_1.move(
-                delta_x, delta_y, food_x_y)
+                game_over = self.check_for_out_of_bounds(game_over)
 
-            game_over = self.check_for_out_of_bounds(game_over)
+                if food_eaten:
+                    food_x_y = self.rand_x_y()
+    
+                self.tile_background()
 
-            if food_eaten:
-                food_x_y = self.rand_x_y()
- 
-            self.tile_background()
-
-            self.draw_snake(self.snake_1.pixels)
-            self.draw_fruit(food_x_y)
-            self.show_scores()
-            self.clock.tick(self.snake_1.speed)
+                self.draw_snake(self.snake_1.pixels)
+                self.draw_fruit(food_x_y)
+                self.show_scores()
+                self.clock.tick(self.snake_1.speed)
             self.update()
 
         self.game_over_screen()
