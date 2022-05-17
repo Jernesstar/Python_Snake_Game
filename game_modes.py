@@ -1,7 +1,10 @@
-from random import randrange
+from random import randrange, choice
 
 import pygame
-from pygame import K_ESCAPE, K_RETURN, QUIT, KEYDOWN
+from pygame import (
+    K_ESCAPE, K_RETURN, QUIT, KEYDOWN,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d
+)
 
 from snake import Snake
 
@@ -22,7 +25,7 @@ class Game_Mode():
     light_green = (0, 250, 0)
     dark_green = (0, 130, 0)
 
-    message_font = pygame.font.SysFont("arial", 30)
+    message_font = pygame.font.SysFont("arial", 20)
     score_font = pygame.font.SysFont("arial", 20)
 
     def __init__(self, game):
@@ -31,8 +34,8 @@ class Game_Mode():
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
-        self.display_width += self.display_width % self.snake_1.size
-        self.display_height += self.display_height % self.snake_1.size
+        #self.display_width += game.width % game.snake_1.size
+        #self.display_height += game.height % game.snake_1.size
 
     def run(self):
         pass
@@ -51,7 +54,7 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        size_divides_width = self.display_height // 10 % self.snake_1.size == 0
+        size_divides_height = self.display_height // 10 % self.snake_1.size == 0
 
         for x in range(0, self.display_width, self.snake_1.size):
             for y in range(0, self.display_height, self.snake_1.size):
@@ -61,7 +64,7 @@ class Game_Mode():
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
                 colors.reverse() 
-            if size_divides_width:     
+            if size_divides_height:     
                 colors.reverse()
 
     def pause_screen(self):
@@ -121,14 +124,17 @@ class Game_Mode():
         elif event.type == KEYDOWN:
             return False
         
-    def rand_x_y(self):
+    def rand_x_y(self, old_x, old_y):
         size = self.snake_1.size
-        rand_x = randrange(0, (self.display_width - 10) // size) * size
-        rand_y = randrange(0, (self.display_height - 10) // size) * size
-        if (rand_x, rand_y) not in self.snake_1.pixels:
+        
+        rand_x = randrange(0, (self.snake_1.display_width) // size) * size
+        rand_y = randrange(0, (self.snake_1.display_height) // size) * size
+        
+        if (rand_x, rand_y) not in self.snake_1.pixels and \
+            (rand_x, rand_y) != (old_x, old_y):
             return (rand_x, rand_y)
         else:
-            return self.rand_x_y()
+            return self.rand_x_y(old_x, old_y)
 
 class OnePlayer_Classic_Snake(Game_Mode):
 
@@ -141,19 +147,23 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
         while True:
             for event in pygame.event.get():
-                if event.type in (KEYDOWN, QUIT):
+                if event.type == KEYDOWN:
+                    if event.key not in (K_UP, K_DOWN, K_LEFT, K_RIGHT) \
+                    and event.key not in (K_w, K_s, K_a, K_d):
+                        self.end()
+                if event.type == QUIT:
                     self.end()
             self.tile_background()
 
             self.game_display.blit(
                 text_1, 
-                [(self.display_width // 2) - 140, 
+                [(self.display_width // 2) - 100, 
                 (self.display_height // 2) - 40]
             )
             
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 180, 
+                [(self.display_width // 2) - 120, 
                 (self.display_height // 2)]
             )
             self.update()
@@ -161,11 +171,11 @@ class OnePlayer_Classic_Snake(Game_Mode):
     def run(self):
         game_over, paused = False, False  
 
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y() 
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
 
         delta_x, delta_y = 0, 0
 
-        food_x_y = self.rand_x_y()
+        food_x_y = self.rand_x_y(0, 0)
         
         while game_over == False:
             for event in pygame.event.get():
@@ -187,7 +197,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                 game_over = self.check_for_out_of_bounds(game_over)
 
                 if food_eaten:
-                    food_x_y = self.rand_x_y()
+                    food_x_y = self.rand_x_y(*food_x_y)
     
                 self.tile_background()
 
@@ -214,10 +224,9 @@ class TwoPlayer_Snake(Game_Mode):
         self.display_width = game.width
         self.display_height = game.height
 
-    def rand_x_y(self):
-        (rand_x, rand_y) = super().rand_x_y()
-        if (rand_x, rand_y) not in self.snake_1.pixels and \
-            (rand_x, rand_y) not in self.snake_2.pixels:
+    def rand_x_y(self, old_x, old_y):
+        (rand_x, rand_y) = super().rand_x_y(old_x, old_y)
+        if (rand_x, rand_y) not in self.snake_2.pixels:
             return (rand_x, rand_y)
         else:
             return self.rand_x_y()
@@ -293,7 +302,7 @@ class TwoPlayer_Snake(Game_Mode):
             
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 170, 
+                [(self.display_width // 2) - 150, 
                 (self.display_height // 2)]
             )
             self.update()
@@ -311,8 +320,8 @@ class TwoPlayer_Snake(Game_Mode):
         self.game_display.blit(text_2, [0, 25])
         
     def run(self):        
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
-        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
+        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y(250, 250)
             
         delta_x_1, delta_y_1 = 0, 0
         delta_x_2, delta_y_2 = 0, 0
@@ -321,7 +330,7 @@ class TwoPlayer_Snake(Game_Mode):
         game_over_2 = False
         paused = False
 
-        foods = [self.rand_x_y() for _ in range(5)]
+        foods = [self.rand_x_y(0, 0) for _ in range(5)]
         
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
@@ -350,12 +359,12 @@ class TwoPlayer_Snake(Game_Mode):
 
                 if i != -1:
                     # If fruit at i eaten, replace      
-                    foods.pop(i) 
-                    foods.append(self.rand_x_y()) 
+                    (old_x, old_y) = foods.pop(i) 
+                    foods.append(self.rand_x_y(old_x, old_y)) 
                 if j != -1:
                     # If fruit at j eaten, replace      
-                    foods.pop(j) 
-                    foods.append(self.rand_x_y()) 
+                    (old_x, old_y) = foods.pop(j) 
+                    foods.append(self.rand_x_y(old_x, old_y)) 
 
                 self.game_display.fill(self.white)
                 self.tile_background()

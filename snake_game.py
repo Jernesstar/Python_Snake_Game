@@ -18,7 +18,7 @@ class SnakeGame:
     snake: Snake
     snake_2: Snake
 
-    width, height = 900, 600
+    width, height = 1200, 600
     
     def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
@@ -26,11 +26,11 @@ class SnakeGame:
         pygame.display.update()
         
         self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
-        self.snake_1.size = 30
+        self.snake_1.size = 40
     
         if name_2 != "":
             self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)
-            self.snake_2.size = 30
+            self.snake_2.size = 50
             self.two_player_snake = TwoPlayer_Snake(game=self)
             
         self.classic_snake = OnePlayer_Classic_Snake(game=self)
@@ -41,6 +41,6 @@ class SnakeGame:
         quit()
 
     def play(self):
-        # self.classic_snake.run()
-        self.two_player_snake.run()
+        self.classic_snake.run()
+        # self.two_player_snake.run()
         self.end()

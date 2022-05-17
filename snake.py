@@ -13,17 +13,12 @@ class Snake:
 
     score = 0
     size = 10
-    speed = 11
+    speed = 9
     length = 1
-    head_x = 0
-    head_y = 0
+    head_x = 250
+    head_y = 250
 
-    def __init__(
-        self,
-        game,
-        name, 
-        controls=Control.KEYS
-    ):
+    def __init__(self,game,name, controls=Control.KEYS):
         self.name = name.strip()
         self.display_width = game.width
         self.display_height = game.height
