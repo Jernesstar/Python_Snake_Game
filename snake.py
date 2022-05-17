@@ -13,7 +13,7 @@ class Snake:
 
     score = 0
     size = 10
-    speed = 12
+    speed = 11
     length = 1
     head_x = 0
     head_y = 0
