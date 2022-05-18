@@ -68,20 +68,6 @@ class Game_Mode():
             if size_divides_height:     
                 colors.reverse()
 
-    def pause_screen(self):
-        message = "Paused. Press any key to continue"
-        text = self.message_font.render(
-            message, True, self.red
-        )
-        self.tile_background()
-        self.draw_snake(self.snake_1.pixels)
-
-        self.game_display.blit(
-            text, 
-            [(self.display_width // 2) - 150, 
-            (self.display_height // 2) - 25]
-        )
-
     def show_scores(self):
         message = f"{self.snake_1.name}'s score: {self.snake_1.score}"
         text_1 = self.score_font.render(
@@ -104,6 +90,20 @@ class Game_Mode():
             self.game_display, 
             self.orange, 
             [x, y, self.snake_1.size, self.snake_1.size]
+        )
+
+    def pause_screen(self):
+        message = "Paused. Press any key to continue"
+        text = self.message_font.render(
+            message, True, self.red
+        )
+        self.tile_background()
+        self.draw_snake(self.snake_1.pixels)
+
+        self.game_display.blit(
+            text, 
+            [(self.display_width // 2) - 315, 
+            (self.display_height // 2) - self.score_font.get_height()]
         )
     
     def check_for_pause(self, paused, event: pygame.event):
@@ -155,11 +155,11 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
         while True:
             for event in pygame.event.get():
+                if event.type in (QUIT, K_ESCAPE):
+                    return True
                 if event.type == KEYDOWN:
                     if self.check_end_game(event):
                         return False
-                if event.type in (QUIT, K_ESCAPE):
-                    return True
             self.tile_background()
 
             self.game_display.blit(
@@ -183,8 +183,6 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
         food_x_y = self.rand_x_y(0, 0)
 
-        # pygame.mixer.music.play(start=4)
-        
         while game_over == False:
             for event in pygame.event.get():
                 if event.type in (QUIT, K_ESCAPE):
@@ -216,7 +214,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
             self.update()
 
-        self.game_over_screen()
+        return self.game_over_screen()
 
 
 class TwoPlayer_Snake(Game_Mode):
