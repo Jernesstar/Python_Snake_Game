@@ -9,7 +9,6 @@ from pygame import (
 from snake import Snake
 
 pygame.init()
-pygame.mixer.init()
 
 class Game_Mode():
 
@@ -26,20 +25,18 @@ class Game_Mode():
     light_green = (0, 250, 0)
     dark_green = (0, 130, 0)
 
-    message_font = pygame.font.SysFont("arial", 20)
-    score_font = pygame.font.SysFont("arial", 20)
-
-    ding_sound = pygame.mixer.Sound("resources\\ding.mp3")
-    background_music = pygame.mixer.music.load("resources\\bg_music.mp3")
-
     def __init__(self, game):
         self.snake_1 = game.snake_1
         self.clock = game.clock
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
+
         self.display_width += game.width % game.snake_1.size
         self.display_height += game.height % game.snake_1.size
+    
+        self.message_font = pygame.font.Font("resources\\pixel_fonts.ttf", 40)
+        self.score_font = pygame.font.Font("resources\\pixel_fonts.ttf", 20)
 
     def run(self):
         pass
@@ -84,19 +81,6 @@ class Game_Mode():
             [(self.display_width // 2) - 150, 
             (self.display_height // 2) - 25]
         )
-    
-    def check_for_out_of_bounds(self, game_over):
-        if game_over:
-            return True
-        if self.snake_1.head_x >= self.display_width:
-            return True
-        elif self.snake_1.head_x <= -self.snake_1.size:
-            return True
-        elif self.snake_1.head_y >= self.display_height:
-            return True
-        elif self.snake_1.head_y <= -self.snake_1.size:
-            return True
-        return False
 
     def show_scores(self):
         message = f"{self.snake_1.name}'s score: {self.snake_1.score}"
@@ -104,7 +88,7 @@ class Game_Mode():
             message,
             True, self.black
         )
-        self.game_display.blit(text_1, [0, 0])
+        self.game_display.blit(text_1, [3, 0])
 
     def draw_snake(self, pixels):
         for x, y, in pixels:
@@ -133,6 +117,19 @@ class Game_Mode():
             if event.key not in (K_UP, K_DOWN, K_LEFT, K_RIGHT) \
             and event.key not in (K_w, K_s, K_a, K_d):
                 return True
+        return False
+        
+    def check_for_out_of_bounds(self, game_over):
+        if game_over:
+            return True
+        if self.snake_1.head_x >= self.display_width:
+            return True
+        elif self.snake_1.head_x <= -self.snake_1.size:
+            return True
+        elif self.snake_1.head_y >= self.display_height:
+            return True
+        elif self.snake_1.head_y <= -self.snake_1.size:
+            return True
         return False
         
     def rand_x_y(self, old_x, old_y):
@@ -167,13 +164,13 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
             self.game_display.blit(
                 text_1, 
-                [(self.display_width // 2) - 100, 
-                (self.display_height // 2) - 40]
+                [(self.display_width // 2) - 210, 
+                (self.display_height // 2) - self.message_font.get_height()]
             )
             
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 120, 
+                [(self.display_width // 2) - 250, 
                 (self.display_height // 2)]
             )
             self.update()
@@ -263,6 +260,18 @@ class TwoPlayer_Snake(Game_Mode):
                 self.orange, 
                 [x, y, self.snake_1.size, self.snake_1.size]
             )
+
+    def show_scores(self):
+        text_1 = self.score_font.render(
+            f"{self.snake_1.name}'s score: {self.snake_1.score}",
+            True, self.black
+        )
+        text_2 = self.score_font.render(
+            f"{self.snake_2.name}'s score: {self.snake_2.score}",
+            True, self.red
+        )
+        self.game_display.blit(text_1, [3, 0])
+        self.game_display.blit(text_2, [3, self.score_font.get_height()])
     
     def check_for_out_of_bounds(self):
         _left_1 = self.snake_1.head_x <= -10
@@ -319,18 +328,6 @@ class TwoPlayer_Snake(Game_Mode):
                 (self.display_height // 2)]
             )
             self.update()
-            
-    def show_scores(self):
-        text_1 = self.score_font.render(
-            f"{self.snake_1.name}'s score: {self.snake_1.score}",
-            True, self.black
-        )
-        text_2 = self.score_font.render(
-            f"{self.snake_2.name}'s score: {self.snake_2.score}",
-            True, self.red
-        )
-        self.game_display.blit(text_1, [0, 0])
-        self.game_display.blit(text_2, [0, 25])
         
     def run(self):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
