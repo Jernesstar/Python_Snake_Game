@@ -18,7 +18,7 @@ class SnakeGame:
     snake: Snake
     snake_2: Snake
 
-    width, height = 1200, 600
+    width, height = 1000, 600
     
     def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
@@ -43,4 +43,3 @@ class SnakeGame:
     def play(self):
         self.classic_snake.run()
         # self.two_player_snake.run()
-        self.end()

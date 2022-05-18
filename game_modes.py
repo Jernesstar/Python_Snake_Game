@@ -34,8 +34,8 @@ class Game_Mode():
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
-        #self.display_width += game.width % game.snake_1.size
-        #self.display_height += game.height % game.snake_1.size
+        self.display_width += game.width % game.snake_1.size
+        self.display_height += game.height % game.snake_1.size
 
     def run(self):
         pass
@@ -123,6 +123,13 @@ class Game_Mode():
             return True if paused == False else False
         elif event.type == KEYDOWN:
             return False
+
+    def check_end_game(self, event):
+        if event.type == KEYDOWN:
+            if event.key not in (K_UP, K_DOWN, K_LEFT, K_RIGHT) \
+            and event.key not in (K_w, K_s, K_a, K_d):
+                return True
+        return False
         
     def rand_x_y(self, old_x, old_y):
         size = self.snake_1.size
@@ -148,8 +155,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
         while True:
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
-                    if event.key not in (K_UP, K_DOWN, K_LEFT, K_RIGHT) \
-                    and event.key not in (K_w, K_s, K_a, K_d):
+                    if self.check_end_game(event):
                         self.end()
                 if event.type == QUIT:
                     self.end()
@@ -286,11 +292,10 @@ class TwoPlayer_Snake(Game_Mode):
         text = self.message_font.render(message, True, self.red)
         text_2 = self.message_font.render(message_2, True, self.red)
 
-        game_close = False
-        while game_close == False:
+        while True:
             for event in pygame.event.get():
-                if event.type in (QUIT, KEYDOWN):
-                    game_close = True
+                if self.check_end_game(event):
+                    self.end()
             self.game_display.fill(self.white)
             self.tile_background()
 

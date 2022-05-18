@@ -123,6 +123,9 @@ class Snake:
         return (delta_x, delta_y)
         
     def get_directions_wasd(self, event: pygame.event, delta_x, delta_y):
+        
+        if len(self.pixels) == 0:
+            return
         if len(self.pixels) == 1:
             if event.key in (K_a, K_d):
                 delta_x = -self.size if event.key == K_a else self.size
