@@ -9,6 +9,7 @@ from pygame import (
 from snake import Snake
 
 pygame.init()
+pygame.mixer.init()
 
 class Game_Mode():
 
@@ -27,6 +28,9 @@ class Game_Mode():
 
     message_font = pygame.font.SysFont("arial", 20)
     score_font = pygame.font.SysFont("arial", 20)
+
+    ding_sound = pygame.mixer.Sound("resources\\ding.mp3")
+    background_music = pygame.mixer.music.load("resources\\bg_music.mp3")
 
     def __init__(self, game):
         self.snake_1 = game.snake_1
@@ -156,9 +160,9 @@ class OnePlayer_Classic_Snake(Game_Mode):
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if self.check_end_game(event):
-                        self.end()
-                if event.type == QUIT:
-                    self.end()
+                        return False
+                if event.type in (QUIT, K_ESCAPE):
+                    return True
             self.tile_background()
 
             self.game_display.blit(
@@ -178,15 +182,16 @@ class OnePlayer_Classic_Snake(Game_Mode):
         game_over, paused = False, False  
 
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
-
         delta_x, delta_y = 0, 0
 
         food_x_y = self.rand_x_y(0, 0)
+
+        # pygame.mixer.music.play(start=4)
         
         while game_over == False:
             for event in pygame.event.get():
                 if event.type in (QUIT, K_ESCAPE):
-                    self.end()          
+                    return True  
                 if event.type == KEYDOWN:
                     paused = self.check_for_pause(paused, event)
                     # If one snake, allow for KEYS or WASD    
@@ -204,7 +209,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
                 if food_eaten:
                     food_x_y = self.rand_x_y(*food_x_y)
-    
+                    
                 self.tile_background()
 
                 self.draw_snake(self.snake_1.pixels)
@@ -294,8 +299,11 @@ class TwoPlayer_Snake(Game_Mode):
 
         while True:
             for event in pygame.event.get():
-                if self.check_end_game(event):
-                    self.end()
+                if event.type == KEYDOWN:
+                    if self.check_end_game(event):
+                        return False
+                if event.type == QUIT:
+                    return True
             self.game_display.fill(self.white)
             self.tile_background()
 
@@ -340,7 +348,7 @@ class TwoPlayer_Snake(Game_Mode):
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    self.end()
+                    return True
                 if event.type == KEYDOWN:
                     paused = self.check_for_pause(paused, event)
 
