@@ -89,6 +89,9 @@ class Snake:
         as it will always be the last positions to be appended to
         `self.pixels`
         """
+        if self.pixels == []:
+            return (0, 0)
+            
         if len(self.pixels) == 1:
             if event.key in (K_LEFT, K_RIGHT):
                 delta_x = -self.size if event.key == K_LEFT else self.size
@@ -128,9 +131,9 @@ class Snake:
         return (delta_x, delta_y)
         
     def get_directions_wasd(self, event: pygame.event, delta_x, delta_y):
-        
-        if len(self.pixels) == 0:
-            return
+        if self.pixels == []:
+            return (0, 0)
+            
         if len(self.pixels) == 1:
             if event.key in (K_a, K_d):
                 delta_x = -self.size if event.key == K_a else self.size

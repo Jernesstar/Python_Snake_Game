@@ -9,7 +9,7 @@ from game_modes import (
 )
 
 pygame.init()
-pygame.display.set_caption("Snake Game")
+pygame.display.set_caption("Snake Game 2.0")
 
 
 class SnakeGame:
@@ -17,28 +17,31 @@ class SnakeGame:
     snake_1: Snake
     snake_2: Snake
 
-    width, height = 1000, 600
+    width, height = 600, 300
     
     black = (0, 0, 0)
     white = (255, 255, 255)
 
-    message_font = pygame.font.Font("resources\\pixel_fonts.ttf", 40)
+    message_font = pygame.font.Font("resources\\pixel_font.ttf", 40)
     
     def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
-        self.game_display = pygame.display.set_mode((self.width, self.height))
-        pygame.display.update()
         
-        self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
+        self.snake_1 = Snake(game=self, name=name_1, controls=Control.WASD)
         self.snake_1.size = 40
-           
-        self.classic_snake = OnePlayer_Classic_Snake(game=self)
     
         if name_2 != "":
             self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)
             self.snake_2.size = 40
-            self.two_player_snake = TwoPlayer_Snake(game=self)
-
+            
+        self.width += self.width % self.snake_1.size
+        self.height += self.height % self.snake_1.size
+        
+        self.game_display = pygame.display.set_mode((self.width, self.height))
+        
+        self.classic_snake = OnePlayer_Classic_Snake(game=self)
+        if name_2 != "":
+            self.two_player = TwoPlayer_Snake(game=self)
 
     def start_screen(self):
         message = "Welcome to the snake game!"
