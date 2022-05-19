@@ -63,12 +63,12 @@ class SnakeGame:
             self.game_display.blit(background, [0, 0])
             self.game_display.blit(
                 text, 
-                [(self.width // 2) - 250, 
+                [(self.width // 2) - 270, 
                 (self.height // 2) - self.message_font.get_height()]
             )
             self.game_display.blit(
                 text_2, 
-                [(self.width // 2) - 230, 
+                [(self.width // 2) - 250, 
                 (self.height // 2)]
             )
             pygame.display.update()
@@ -84,9 +84,9 @@ class SnakeGame:
     def play(self):
         self.start_screen()
 
-        stop = False
-        while stop != True:
-            stop = self.classic_snake.run()
+        while True:
+            self.snake_1.reset()
+            self.snake_2.reset()
+            self.classic_snake.run()
 
-        # self.two_player_snake.run()
         self.end()

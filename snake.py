@@ -25,6 +25,10 @@ class Snake:
         self.controls = controls
         self.pixels = []
 
+    def reset(self):
+        self.pixels = []
+        self.score = 0
+
     def check_for_game_over(self):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
             return True 

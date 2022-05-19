@@ -36,7 +36,7 @@ class Game_Mode():
         self.display_height += game.height % game.snake_1.size
     
         self.message_font = pygame.font.Font("resources\\pixel_fonts.ttf", 40)
-        self.score_font = pygame.font.Font("resources\\pixel_fonts.ttf", 20)
+        self.score_font = pygame.font.Font("resources\\pixel_fonts.ttf", 25)
 
     def run(self):
         pass
@@ -109,8 +109,6 @@ class Game_Mode():
     def check_for_pause(self, paused, event: pygame.event):
         if event.key == K_RETURN:
             return True if paused == False else False
-        elif event.type == KEYDOWN:
-            return False
 
     def check_end_game(self, event):
         if event.type == KEYDOWN:
@@ -152,7 +150,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
         text_1 = self.message_font.render(message_1, True, self.red)
         text_2 = self.message_font.render(message_2, True, self.red)
-
+    
         while True:
             for event in pygame.event.get():
                 if event.type in (QUIT, K_ESCAPE):
@@ -176,7 +174,8 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.update()
 
     def run(self):
-        game_over, paused = False, False  
+        game_over = False
+        paused = False  
 
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
         delta_x, delta_y = 0, 0
@@ -185,9 +184,11 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
         while game_over == False:
             for event in pygame.event.get():
-                if event.type in (QUIT, K_ESCAPE):
-                    return True  
+                if event.type == QUIT:
+                    return True 
                 if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        return True
                     paused = self.check_for_pause(paused, event)
                     # If one snake, allow for KEYS or WASD    
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
@@ -213,7 +214,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                 self.clock.tick(self.snake_1.speed)
 
             self.update()
-
+            
         return self.game_over_screen()
 
 
