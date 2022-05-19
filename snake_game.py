@@ -84,9 +84,10 @@ class SnakeGame:
     def play(self):
         self.start_screen()
 
-        while True:
+        stop = False
+        while stop == False:
             self.snake_1.reset()
             self.snake_2.reset()
-            self.classic_snake.run()
+            stop = self.classic_snake.run()
 
         self.end()

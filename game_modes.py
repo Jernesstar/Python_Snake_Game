@@ -153,9 +153,11 @@ class OnePlayer_Classic_Snake(Game_Mode):
     
         while True:
             for event in pygame.event.get():
-                if event.type in (QUIT, K_ESCAPE):
+                if event.type == QUIT:
                     return True
                 if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        return True
                     if self.check_end_game(event):
                         return False
             self.tile_background()

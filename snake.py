@@ -13,12 +13,12 @@ class Snake:
 
     score = 0
     size = 10
-    speed = 9
+    speed = 10
     length = 1
     head_x = 250
     head_y = 250
 
-    def __init__(self,game,name, controls=Control.KEYS):
+    def __init__(self, game, name, controls=Control.KEYS):
         self.name = name.strip()
         self.display_width = game.width
         self.display_height = game.height
@@ -28,6 +28,7 @@ class Snake:
     def reset(self):
         self.pixels = []
         self.score = 0
+        self.length = 1
 
     def check_for_game_over(self):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
