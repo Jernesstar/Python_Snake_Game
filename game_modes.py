@@ -301,7 +301,7 @@ class TwoPlayer_Snake(Game_Mode):
         if _left_1 or _right_1 or _up_1 or _down_1:
             return (True, False) # Player_1 lose is True
         if _left_2 or _right_2 or _up_2 or _down_2:
-            return (False, True) # Player_1 lose is True
+            return (False, True) # Player_2 lose is True
         return (False, False) # No one has gone out of bounds
 
     def check_for_game_over(self, game_over_1, game_over_2):
@@ -312,10 +312,10 @@ class TwoPlayer_Snake(Game_Mode):
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
             self.snake_1.name if not snake_1_game_over else self.snake_2.name,
-            self.snake_2.score if not snake_1_game_over else self.snake_2.score
+            self.snake_1.score if not snake_1_game_over else self.snake_2.score
         )
         message = f"{winner_name} wins, score {winner_score}"
-        message_2 = "Press any key to continue"
+        message_2 = "Press return to continue"
 
         text = self.message_font.render(message, True, self.red)
         text_2 = self.message_font.render(message_2, True, self.red)
@@ -325,6 +325,8 @@ class TwoPlayer_Snake(Game_Mode):
                 if event.type == QUIT:
                     return True
                 if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        return True
                     if event.key == K_RETURN:
                         return False
                         
@@ -361,13 +363,14 @@ class TwoPlayer_Snake(Game_Mode):
                 if event.type == QUIT:
                     return True
                 if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        return True
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
                     (delta_x_1, delta_y_1) = self.snake_1.directions(
                         event, delta_x_1, delta_y_1)
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
-
             if paused:
                 self.pause_screen()
             else:
@@ -399,4 +402,4 @@ class TwoPlayer_Snake(Game_Mode):
                 self.clock.tick(self.snake_1.speed)
             self.update()
 
-        self.winner_screen(snake_1_game_over=game_over_1)
+        return self.winner_screen(snake_1_game_over=game_over_1)

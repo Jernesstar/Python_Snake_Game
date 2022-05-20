@@ -5,6 +5,7 @@ from pygame.constants import K_LEFT, K_RETURN, K_RIGHT
 from snake import Snake, Control
 
 from game_modes import (
+    Game_Mode,
     OnePlayer_Classic_Snake,
     TwoPlayer_Snake
 )
@@ -84,7 +85,7 @@ class SnakeGame:
             colors.reverse()
             pygame.display.update()
 
-    def menu_screen(self):
+    def menu_screen(self, last_selected) -> tuple[Game_Mode, int]:
         x_1 = self.width // 2 - 220
         y = self.height // 2
         x_2 = self.width // 2 + 30
@@ -99,6 +100,8 @@ class SnakeGame:
         square_2 = pygame.rect.Rect(x_2, y, 170, 50)
 
         colors = [self.white, self.black]
+        if last_selected == 1:
+            colors.reverse()
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -110,9 +113,9 @@ class SnakeGame:
                         colors.reverse()
                     if event.key == K_RETURN:
                         if colors[0] == self.white:
-                            return self.classic_snake
+                            return (self.classic_snake, 0)
                         if colors[1] == self.white:
-                            return self.two_player
+                            return (self.two_player, 1)
      
             self.game_display.blit(self.background, [0, 0])
 
@@ -135,7 +138,6 @@ class SnakeGame:
                 text_2, 
                 (square_2.center[0] - 74, square_2.center[1] - 12)
             )
-            
             pygame.display.update()
                     
     def end(self):
@@ -147,8 +149,9 @@ class SnakeGame:
         self.start_screen()
         stop = False
         
+        last_selected: int = 0
         while stop == False:
-            game_mode = self.menu_screen()
+            (game_mode, last_selected) = self.menu_screen(last_selected)
             self.snake_1.reset()
             self.snake_2.reset()
             stop = game_mode.run()
