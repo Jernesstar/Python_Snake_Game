@@ -1,4 +1,5 @@
 from random import randrange, choice
+from functools import singledispatchmethod
 
 import pygame
 from pygame import (
@@ -33,12 +34,8 @@ class Game_Mode():
         self.display_width = game.width
         self.display_height = game.height
 
-    def run(self):
-        pass
-
-    def play(self):
-        self.run()
-        self.end()
+    def run(self, **kwargs):
+        raise NotImplementedError("Child classes should implement this method")
 
     def update(self):
         pygame.display.update()
@@ -48,11 +45,16 @@ class Game_Mode():
         pygame.quit()
         quit()
 
+    def get_fruit_positions(self, number: int):
+        old_x = self.snake_1.head_x
+        old_y = self.snake_1.head_y
+        if number == 1:
+            return self.rand_x_y(old_x, old_y)
+        return [self.rand_x_y(old_x, old_y) for _ in range(number)]
+
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        size_divides_height = (self.display_height // 10) % self.snake_1.size == 0
-        height_is_even = (self.display_height // 10) % 2 == 0
-        size_is_even = self.snake_1.size % 2 == 0
+        tile_count_even = (self.display_width // self.snake_1.size) % 2 == 0
 
         for x in range(0, self.display_width, self.snake_1.size):
             for y in range(0, self.display_height, self.snake_1.size):
@@ -62,11 +64,7 @@ class Game_Mode():
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
                 colors.reverse()
-            if not size_is_even:   
-                colors.reverse()
-            elif not height_is_even:
-                colors.reverse()
-            elif size_divides_height:
+            if not tile_count_even:
                 colors.reverse()
 
     def show_scores(self):
@@ -86,12 +84,20 @@ class Game_Mode():
             )
 
     def draw_fruit(self, coordinates):
-        (x, y) = coordinates
-        pygame.draw.rect(
-            self.game_display, 
-            self.orange, 
-            [x, y, self.snake_1.size, self.snake_1.size]
-        )
+        if isinstance(coordinates, tuple):
+            (x, y) = coordinates
+            pygame.draw.rect(
+                self.game_display, 
+                self.orange, 
+                [x, y, self.snake_1.size, self.snake_1.size]
+            )
+        elif isinstance(coordinates, list):
+            for x, y in coordinates:
+                pygame.draw.rect(
+                    self.game_display, 
+                    self.orange, 
+                    [x, y, self.snake_1.size, self.snake_1.size]
+                )
 
     def pause_screen(self):
         message = "Paused. Press any key to continue"
@@ -143,6 +149,7 @@ class Game_Mode():
         else:
             return self.rand_x_y(old_x, old_y)
 
+
 class OnePlayer_Classic_Snake(Game_Mode):
 
     def game_over_screen(self):
@@ -176,14 +183,18 @@ class OnePlayer_Classic_Snake(Game_Mode):
             )
             self.update()
 
-    def run(self):
+    def run(self, **kwargs):
         game_over = False
         paused = False  
 
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
+        
         delta_x, delta_y = 0, 0
 
-        food_x_y = self.rand_x_y(0, 0)
+        try:
+            food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
+        except:
+            food_x_y = self.rand_x_y(0, 0)
 
         while game_over == False:
             for event in pygame.event.get():
@@ -206,15 +217,22 @@ class OnePlayer_Classic_Snake(Game_Mode):
                     delta_x, delta_y, food_x_y)
 
                 game_over = self.check_for_out_of_bounds(game_over)
+                
+                if isinstance(food_eaten, bool):
+                    if food_eaten:
+                        food_x_y = self.rand_x_y(*food_x_y)
+                
+                if isinstance(food_eaten, int):
+                    if food_eaten != -1:
+                        x_y = food_x_y.pop(food_eaten)
+                        food_x_y.append(self.rand_x_y(*x_y))
 
-                if food_eaten:
-                    food_x_y = self.rand_x_y(*food_x_y)
-                    
                 self.tile_background()
 
-                self.draw_snake(self.snake_1.pixels)
                 self.draw_fruit(food_x_y)
+                self.draw_snake(self.snake_1.pixels)
                 self.show_scores()
+
                 self.clock.tick(self.snake_1.speed)
 
             self.update()
@@ -265,14 +283,6 @@ class TwoPlayer_Snake(Game_Mode):
                 self.game_display, 
                 self.red, 
                 [x, y, self.snake_2.size, self.snake_2.size]
-            )
-        
-    def draw_fruits(self, coordinates):
-        for x, y in coordinates:
-            pygame.draw.rect(
-                self.game_display, 
-                self.orange, 
-                [x, y, self.snake_1.size, self.snake_1.size]
             )
 
     def show_scores(self):
@@ -337,7 +347,6 @@ class TwoPlayer_Snake(Game_Mode):
                 [(self.display_width // 2) - 150, 
                 (self.display_height // 2) - 40]
             )
-            
             self.game_display.blit(
                 text_2,
                 [(self.display_width // 2) - 120, 
@@ -345,7 +354,7 @@ class TwoPlayer_Snake(Game_Mode):
             )
             self.update()
         
-    def run(self):        
+    def run(self, **kwargs):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y(250, 250)
             
@@ -356,8 +365,11 @@ class TwoPlayer_Snake(Game_Mode):
         game_over_2 = False
         paused = False
 
-        foods = [self.rand_x_y(0, 0) for _ in range(5)]
-        
+        try:
+            food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
+        except:
+            food_x_y = self.rand_x_y(0, 0)
+
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -375,28 +387,30 @@ class TwoPlayer_Snake(Game_Mode):
                 self.pause_screen()
             else:
                 (i, game_over_1) = self.snake_1.move(
-                    delta_x_1, delta_y_1, foods)
+                    delta_x_1, delta_y_1, food_x_y)
 
                 (j, game_over_2) = self.snake_2.move(
-                    delta_x_2, delta_y_2, foods)
+                    delta_x_2, delta_y_2, food_x_y)
 
                 (game_over_1, game_over_2) = self.check_for_game_over(
                     game_over_1, game_over_2)
 
-                if i != -1:
-                    # If fruit at i eaten, replace      
-                    (old_x, old_y) = foods.pop(i) 
-                    foods.append(self.rand_x_y(old_x, old_y)) 
-                if j != -1:
-                    # If fruit at j eaten, replace      
-                    (old_x, old_y) = foods.pop(j) 
-                    foods.append(self.rand_x_y(old_x, old_y)) 
+                if isinstance(i, bool):
+                    if i or j:
+                        food_x_y = self.rand_x_y(*food_x_y)
+                
+                if isinstance(i, int):
+                    if i != -1:
+                        x_y = food_x_y.pop(i)
+                        food_x_y.append(self.rand_x_y(*x_y))
+                    if j != -1:
+                        x_y = food_x_y.pop(j)
+                        food_x_y.append(self.rand_x_y(*x_y))
 
-                self.game_display.fill(self.white)
                 self.tile_background()
 
+                self.draw_fruit(food_x_y)
                 self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
-                self.draw_fruits(foods)
                 self.show_scores()
 
                 self.clock.tick(self.snake_1.speed)

@@ -19,7 +19,7 @@ class SnakeGame:
     snake_1: Snake
     snake_2: Snake
 
-    width, height = 1000, 500
+    width, height = 1000, 600
     
     black = (0, 0, 0)
     white = (255, 255, 255)
@@ -72,7 +72,7 @@ class SnakeGame:
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(
                 text, 
-                [(self.width // 2) - 150, 
+                [(self.width // 2) - 120, 
                 (self.height // 2) - self.message_font.get_height()]
             )
             self.game_display.blit(
@@ -148,12 +148,13 @@ class SnakeGame:
     def play(self):
         self.start_screen()
         stop = False
+        game_mode = self.classic_snake
         
         last_selected: int = 0
         while stop == False:
             (game_mode, last_selected) = self.menu_screen(last_selected)
             self.snake_1.reset()
             self.snake_2.reset()
-            stop = game_mode.run()
+            stop = game_mode.run(fruit_count=1)
 
         self.end()

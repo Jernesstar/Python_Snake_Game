@@ -15,6 +15,7 @@ class Snake:
     size = 10
     speed = 10
     length = 1
+
     head_x = 250
     head_y = 250
 
@@ -36,19 +37,20 @@ class Snake:
         return False
 
     def when_eat_food(self, food_coordinates):
-        if isinstance(food_coordinates, list):
+        if isinstance(food_coordinates, tuple):
+            if (self.head_x, self.head_y) == food_coordinates:
+                self.score += 1
+                self.length += 1
+                return True
+            return False
+
+        elif isinstance(food_coordinates, list):
             for i, food_x_y in enumerate(food_coordinates):
                 if (self.head_x, self.head_y) == food_x_y:
                     self.score += 1
                     self.length += 1
                     return i
             return -1
-        elif isinstance(food_coordinates, tuple):
-            if (self.head_x, self.head_y) == food_coordinates:
-                self.score += 1
-                self.length += 1
-                return True
-            return False
             
     def move(self, delta_x, delta_y, food_coordinates):
         self.head_x += delta_x
