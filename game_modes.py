@@ -235,6 +235,17 @@ class TwoPlayer_Snake(Game_Mode):
         self.display_width = game.width
         self.display_height = game.height
 
+    def pause_screen(self):
+        message = "Paused. Press any key to continue"
+        text = self.message_font.render(message, True, self.red)
+        self.tile_background()
+        self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
+        self.game_display.blit(
+            text, 
+            [(self.display_width // 2) - 200, 
+            (self.display_height // 2) - self.score_font.get_height()]
+        )
+
     def rand_x_y(self, old_x, old_y):
         (rand_x, rand_y) = super().rand_x_y(old_x, old_y)
         if (rand_x, rand_y) not in self.snake_2.pixels:
@@ -354,7 +365,6 @@ class TwoPlayer_Snake(Game_Mode):
                         paused = self.check_for_pause(paused, event)
                     (delta_x_1, delta_y_1) = self.snake_1.directions(
                         event, delta_x_1, delta_y_1)
-
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
 

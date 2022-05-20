@@ -29,7 +29,7 @@ class SnakeGame:
     def __init__(self, name_1, name_2 = ""):
         self.clock = pygame.time.Clock()
         
-        self.snake_1 = Snake(game=self, name=name_1, controls=Control.WASD)
+        self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
         self.snake_1.size = 40
     
         if name_2 != "":
@@ -93,7 +93,7 @@ class SnakeGame:
         option_1 = "One Player"
         option_2 = "Two Player"
         
-        text = self.message_font.render(message, True, self.black)
+        text = self.message_font.render(message, True, self.white)
 
         square = pygame.rect.Rect(x_1, y, 170, 50)
         square_2 = pygame.rect.Rect(x_2, y, 170, 50)
