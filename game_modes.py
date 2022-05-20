@@ -61,8 +61,12 @@ class Game_Mode():
                     colors[0],
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
-                colors.reverse() 
-            if size_divides_height or (height_is_even and size_is_even):     
+                colors.reverse()
+            if not size_is_even:   
+                colors.reverse()
+            elif not height_is_even:
+                colors.reverse()
+            elif size_divides_height:
                 colors.reverse()
 
     def show_scores(self):
