@@ -251,7 +251,7 @@ class TwoPlayer_Snake(Game_Mode):
         if (rand_x, rand_y) not in self.snake_2.pixels:
             return (rand_x, rand_y)
         else:
-            return self.rand_x_y()
+            return self.rand_x_y(old_x, old_y)
 
     def draw_snakes(self, pixels_1, pixels_2):
         for x, y, in pixels_1:
