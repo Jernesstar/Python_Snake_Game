@@ -31,9 +31,24 @@ class Snake:
         self.score = 0
         self.length = 1
 
-    def check_for_game_over(self):
+    def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
-            return True 
+            return True
+        if self.check_for_out_of_bounds(game_over):
+            return True
+        return False
+
+    def check_for_out_of_bounds(self, game_over):
+        if game_over:
+            return True
+        if self.head_x >= self.display_width:
+            return True
+        elif self.head_x <= -self.size:
+            return True
+        elif self.head_y >= self.display_height:
+            return True
+        elif self.head_y <= -self.size:
+            return True
         return False
 
     def when_eat_food(self, food_coordinates):
@@ -55,13 +70,11 @@ class Snake:
     def move(self, delta_x, delta_y, food_coordinates):
         self.head_x += delta_x
         self.head_y += delta_y
-        game_over = self.check_for_game_over()
-        food_eaten = self.when_eat_food(food_coordinates)
-        self.pixels.append((self.head_x, self.head_y))
 
+        self.pixels.append((self.head_x, self.head_y))
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
-        return (food_eaten, game_over)
+        return self.when_eat_food(food_coordinates) 
 
     def directions(self, event, delta_x, delta_y):
         if self.controls == Control.KEYS:

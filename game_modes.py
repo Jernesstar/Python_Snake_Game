@@ -64,7 +64,7 @@ class Game_Mode():
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
                 colors.reverse()
-            if not tile_count_even:
+            if tile_count_even:
                 colors.reverse()
 
     def show_scores(self):
@@ -100,19 +100,28 @@ class Game_Mode():
                 )
 
     def pause_screen(self):
-        message = "Paused. Press any key to continue"
+        message = "Paused. Press return key to continue"
         text = self.message_font.render(
             message, True, self.red
         )
-        self.tile_background()
-        self.draw_snake(self.snake_1.pixels)
 
-        self.game_display.blit(
-            text, 
-            [(self.display_width // 2) - 200, 
-            (self.display_height // 2) - self.score_font.get_height()]
-        )
-    
+        while True:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.end()
+                elif event.type == KEYDOWN:
+                    if event.key == K_RETURN:
+                        return
+
+            self.tile_background()
+            self.draw_snake(self.snake_1.pixels)
+
+            self.game_display.blit(
+                text, 
+                [(self.display_width // 2) - 200, 
+                (self.display_height // 2) - self.score_font.get_height()]
+            )
+        
     def check_for_pause(self, paused, event: pygame.event):
         if event.key == K_RETURN:
             return True if paused == False else False
@@ -122,19 +131,6 @@ class Game_Mode():
             if event.key not in (K_UP, K_DOWN, K_LEFT, K_RIGHT) \
             and event.key not in (K_w, K_s, K_a, K_d):
                 return True
-        return False
-        
-    def check_for_out_of_bounds(self, game_over):
-        if game_over:
-            return True
-        if self.snake_1.head_x >= self.display_width:
-            return True
-        elif self.snake_1.head_x <= -self.snake_1.size:
-            return True
-        elif self.snake_1.head_y >= self.display_height:
-            return True
-        elif self.snake_1.head_y <= -self.snake_1.size:
-            return True
         return False
         
     def rand_x_y(self, old_x, old_y):
@@ -188,7 +184,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
         paused = False  
 
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
-        
+
         delta_x, delta_y = 0, 0
 
         try:
@@ -205,35 +201,35 @@ class OnePlayer_Classic_Snake(Game_Mode):
                         return True
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
-                    # If one snake, allow for KEYS or WASD    
+                    # Since only one snake, allow for KEYS or WASD    
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
                         event, delta_x, delta_y)
             if paused:
                 self.pause_screen()
-            else:
-                (food_eaten, game_over) = self.snake_1.move(
-                    delta_x, delta_y, food_x_y)
+            
+            food_eaten = self.snake_1.move(delta_x, delta_y, food_x_y)
+            game_over = self.snake_1.check_for_game_over(game_over)
+            
+            if isinstance(food_eaten, bool):
+                if food_eaten:
+                    food_x_y = self.rand_x_y(*food_x_y)
+            
+            elif isinstance(food_eaten, int):
+                print(food_eaten)
+                if food_eaten != -1:
+                    x_y = food_x_y.pop(food_eaten)
+                    food_x_y.append(self.rand_x_y(*x_y))
+                    pass
 
-                game_over = self.check_for_out_of_bounds(game_over)
-                
-                if isinstance(food_eaten, bool):
-                    if food_eaten:
-                        food_x_y = self.rand_x_y(*food_x_y)
-                
-                if isinstance(food_eaten, int):
-                    if food_eaten != -1:
-                        x_y = food_x_y.pop(food_eaten)
-                        food_x_y.append(self.rand_x_y(*x_y))
+            self.tile_background()
 
-                self.tile_background()
+            self.draw_fruit(food_x_y)
+            self.draw_snake(self.snake_1.pixels)
+            self.show_scores()
 
-                self.draw_fruit(food_x_y)
-                self.draw_snake(self.snake_1.pixels)
-                self.show_scores()
-
-                self.clock.tick(self.snake_1.speed)
+            self.clock.tick(self.snake_1.speed)
 
             self.update()
             
@@ -296,28 +292,6 @@ class TwoPlayer_Snake(Game_Mode):
         )
         self.game_display.blit(text_1, [3, 0])
         self.game_display.blit(text_2, [3, self.score_font.get_height()])
-    
-    def check_for_out_of_bounds(self):
-        _left_1 = self.snake_1.head_x <= -10
-        _right_1 = self.snake_1.head_x >= self.display_width
-        _up_1 = self.snake_1.head_y <= -10
-        _down_1 = self.snake_1.head_y >= self.display_height
-
-        _left_2 = self.snake_2.head_x >= self.display_width
-        _right_2 = self.snake_2.head_x <= -10
-        _up_2 = self.snake_2.head_y >= self.display_height
-        _down_2 = self.snake_2.head_y <= -10
-
-        if _left_1 or _right_1 or _up_1 or _down_1:
-            return (True, False) # Player_1 lose is True
-        if _left_2 or _right_2 or _up_2 or _down_2:
-            return (False, True) # Player_2 lose is True
-        return (False, False) # No one has gone out of bounds
-
-    def check_for_game_over(self, game_over_1, game_over_2):
-        if (game_over_1, game_over_2) != (False, False):
-            return (game_over_1, game_over_2)
-        return self.check_for_out_of_bounds()
     
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
@@ -385,35 +359,32 @@ class TwoPlayer_Snake(Game_Mode):
                         event, delta_x_2, delta_y_2)
             if paused:
                 self.pause_screen()
-            else:
-                (i, game_over_1) = self.snake_1.move(
-                    delta_x_1, delta_y_1, food_x_y)
 
-                (j, game_over_2) = self.snake_2.move(
-                    delta_x_2, delta_y_2, food_x_y)
+            i = self.snake_1.move(delta_x_1, delta_y_1, food_x_y)
+            j = self.snake_2.move(delta_x_2, delta_y_2, food_x_y)
 
-                (game_over_1, game_over_2) = self.check_for_game_over(
-                    game_over_1, game_over_2)
+            game_over_1 = self.snake_1.check_for_game_over(game_over_1)
+            game_over_2 = self.snake_2.check_for_game_over(game_over_2)
 
-                if isinstance(i, bool):
-                    if i or j:
-                        food_x_y = self.rand_x_y(*food_x_y)
-                
-                if isinstance(i, int):
-                    if i != -1:
-                        x_y = food_x_y.pop(i)
-                        food_x_y.append(self.rand_x_y(*x_y))
-                    if j != -1:
-                        x_y = food_x_y.pop(j)
-                        food_x_y.append(self.rand_x_y(*x_y))
+            if isinstance(i, bool):
+                if i or j:
+                    food_x_y = self.rand_x_y(*food_x_y)
+            
+            elif isinstance(i, int):
+                if i != -1:
+                    x_y = food_x_y.pop(i)
+                    food_x_y.append(self.rand_x_y(*x_y))
+                if j != -1:
+                    x_y = food_x_y.pop(j)
+                    food_x_y.append(self.rand_x_y(*x_y))
 
-                self.tile_background()
+            self.tile_background()
 
-                self.draw_fruit(food_x_y)
-                self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
-                self.show_scores()
+            self.draw_fruit(food_x_y)
+            self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
+            self.show_scores()
 
-                self.clock.tick(self.snake_1.speed)
+            self.clock.tick(self.snake_1.speed)
             self.update()
 
         return self.winner_screen(snake_1_game_over=game_over_1)
