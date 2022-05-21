@@ -19,7 +19,7 @@ class SnakeGame:
     snake_1: Snake
     snake_2: Snake
 
-    width, height = 1000, 600
+    width, height = 1000, 640
     
     black = (0, 0, 0)
     white = (255, 255, 255)
@@ -31,7 +31,7 @@ class SnakeGame:
         self.clock = pygame.time.Clock()
         
         self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
-        self.snake_1.size = 40
+        self.snake_1.size = 30
     
         if name_2 != "":
             self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)

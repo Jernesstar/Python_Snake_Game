@@ -54,18 +54,17 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        tile_count_even = (self.display_width // self.snake_1.size) % 2 == 0
 
         for x in range(0, self.display_width, self.snake_1.size):
+            i = 0
             for y in range(0, self.display_height, self.snake_1.size):
                 pygame.draw.rect(
                     self.game_display,
-                    colors[0],
+                    colors[i % 2],
                     [x, y, self.snake_1.size, self.snake_1.size]
                 )
-                colors.reverse()
-            if tile_count_even:
-                colors.reverse()
+                i += 1
+            colors.reverse()
 
     def show_scores(self):
         message = f"{self.snake_1.name}'s score: {self.snake_1.score}"
