@@ -1,5 +1,4 @@
 from random import randrange, choice
-from functools import singledispatchmethod
 
 import pygame
 from pygame import (
