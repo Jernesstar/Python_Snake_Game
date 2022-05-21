@@ -84,7 +84,7 @@ class Snake:
    
     def get_directions_keys(self, event, delta_x, delta_y):
         """
-        Return directions to go depending on directional key presses. 
+        Return directions for snake depending on directional key presses. 
         
         Also makes sure the player can not go directly
         opposite of the direction they are currently going.
@@ -95,8 +95,11 @@ class Snake:
 
         so as this will prevent an `IndexError`
 
-        The following line checks if the snake is currently going left
-        >>> self.pixels[-2][0] - self.pixels[-1][0] < 0
+        The following is the current velocity of the snake
+        >>> current_delta_x = self.pixels[-2][0] - self.pixels[-1][0]
+        
+        This line checks if the snake is currently going left
+        >>> current_delta_x < 0
 
         since the current snake head position always will correspond to:
         `self.pixels[-1]`
@@ -117,35 +120,61 @@ class Snake:
             return (delta_x, delta_y)
 
         if event.key in (K_LEFT, K_RIGHT):
-            """Snake is going left"""
-            if (self.pixels[-1][0] - self.pixels[-2][0]) < 0:
+            current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
+            """Snake is moving left"""
+            if (current_delta_x) < 0:
                 delta_x = -self.size
                 delta_y = 0
-                """
-                Snake is currently moving up, so turning either 
-                direction is fine 
-                """
-            elif (self.pixels[-1][0] - self.pixels[-2][0]) == 0:
+                """Snake is moving up or down"""
+            elif (current_delta_x) == 0:
                 delta_x = -self.size if event.key == K_LEFT else self.size
                 delta_y = 0
-                """Snake is going right"""
-            elif (self.pixels[-1][0] - self.pixels[-2][0]) > 0:
+                """Snake is moving right"""
+            elif (current_delta_x) > 0:
                 delta_x = self.size
                 delta_y = 0
 
         elif event.key in (K_UP, K_DOWN):
-            if (self.pixels[-1][1] - self.pixels[-2][1]) < 0:
+            current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
+            """Snake is going up"""
+            if (current_delta_y) < 0:
                 delta_x = 0
                 delta_y = -self.size
-            elif (self.pixels[-1][1] - self.pixels[-2][1]) == 0:
+                """Snake is going left or right"""
+            elif (current_delta_y) == 0:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_UP else self.size
-            elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
+                """Snake is going down"""
+            elif (current_delta_y) > 0:
                 delta_x = 0
                 delta_y = self.size
         return (delta_x, delta_y)
         
     def get_directions_wasd(self, event: pygame.event, delta_x, delta_y):
+        """
+        Return directions for snake depending on WASD key presses. 
+        
+        Also makes sure the player can not go directly
+        opposite of the direction they are currently going.
+
+        The following if-statement checks that the snake is longer than one
+        pixel:
+        >>> if len(self.pixels) == 1
+
+        so as this will prevent an `IndexError`
+
+        The following is the current velocity of the snake
+        >>> current_delta_x = self.pixels[-2][0] - self.pixels[-1][0]
+
+        This line checks if the snake is currently going left
+        >>> current_delta_x < 0
+
+        since the current snake head position always will correspond to:
+        `self.pixels[-1]`
+
+        as it will always be the last positions to be appended to
+        `self.pixels`
+        """
         if self.pixels == []:
             return (0, 0)
             
@@ -159,25 +188,32 @@ class Snake:
             return (delta_x, delta_y)
 
         if event.key in (K_a, K_d):
+            current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
             """Snake is going left"""
-            if (self.pixels[-1][0] - self.pixels[-2][0]) < 0:
+            if (current_delta_x) < 0:
                 delta_x = -self.size
                 delta_y = 0
-            elif (self.pixels[-1][0] - self.pixels[-2][0]) == 0:
+                """Snake is going up or down"""
+            elif (current_delta_x) == 0:
                 delta_x = -self.size if event.key == K_a else self.size
                 delta_y = 0
-            elif (self.pixels[-1][0] - self.pixels[-2][0]) > 0:
+                """Snake is going right"""
+            elif (current_delta_x) > 0:
                 delta_x = self.size
                 delta_y = 0
 
         elif event.key in (K_w, K_s):
-            if (self.pixels[-1][1] - self.pixels[-2][1]) < 0:
+            current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
+            """Snake is going up"""
+            if (current_delta_y) < 0:
                 delta_x = 0
                 delta_y = -self.size
-            elif (self.pixels[-1][1] - self.pixels[-2][1]) == 0:
+                """Snake is going left or right"""
+            elif (current_delta_y) == 0:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_w else self.size
-            elif (self.pixels[-1][1] - self.pixels[-2][1]) > 0:
+                """Snake is going down"""
+            elif (current_delta_y) > 0:
                 delta_x = 0
                 delta_y = self.size
         return (delta_x, delta_y)

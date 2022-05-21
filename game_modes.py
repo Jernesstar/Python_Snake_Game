@@ -110,16 +110,16 @@ class Game_Mode():
                     self.end()
                 elif event.type == KEYDOWN:
                     if event.key == K_RETURN:
-                        return
+                        return False
 
             self.tile_background()
             self.draw_snake(self.snake_1.pixels)
-
             self.game_display.blit(
                 text, 
                 [(self.display_width // 2) - 200, 
                 (self.display_height // 2) - self.score_font.get_height()]
             )
+            self.update()
         
     def check_for_pause(self, paused, event: pygame.event):
         if event.key == K_RETURN:
@@ -206,7 +206,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
                         event, delta_x, delta_y)
             if paused:
-                self.pause_screen()
+                paused = self.pause_screen()
             
             food_eaten = self.snake_1.move(delta_x, delta_y, food_x_y)
             game_over = self.snake_1.check_for_game_over(game_over)
@@ -357,7 +357,7 @@ class TwoPlayer_Snake(Game_Mode):
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
             if paused:
-                self.pause_screen()
+                paused = self.pause_screen()
 
             i = self.snake_1.move(delta_x_1, delta_y_1, food_x_y)
             j = self.snake_2.move(delta_x_2, delta_y_2, food_x_y)
