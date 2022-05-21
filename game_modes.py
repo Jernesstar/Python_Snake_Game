@@ -229,7 +229,6 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.show_scores()
 
             self.clock.tick(self.snake_1.speed)
-
             self.update()
             
         return self.game_over_screen()
@@ -247,17 +246,6 @@ class TwoPlayer_Snake(Game_Mode):
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
-
-    def pause_screen(self):
-        message = "Paused. Press any key to continue"
-        text = self.message_font.render(message, True, self.red)
-        self.tile_background()
-        self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
-        self.game_display.blit(
-            text, 
-            [(self.display_width // 2) - 200, 
-            (self.display_height // 2) - self.score_font.get_height()]
-        )
 
     def rand_x_y(self, old_x, old_y):
         (rand_x, rand_y) = super().rand_x_y(old_x, old_y)
@@ -291,6 +279,28 @@ class TwoPlayer_Snake(Game_Mode):
         )
         self.game_display.blit(text_1, [3, 0])
         self.game_display.blit(text_2, [3, self.score_font.get_height()])
+
+    def pause_screen(self):
+        message = "Paused. Press return key to continue"
+        text = self.message_font.render(
+            message, True, self.red
+        )
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.end()
+                elif event.type == KEYDOWN:
+                    if event.key == K_RETURN:
+                        return False
+            self.tile_background()
+            self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
+            self.game_display.blit(
+                text, 
+                [(self.display_width // 2) - 200, 
+                (self.display_height // 2) - self.score_font.get_height()]
+            )
+            self.update()
     
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
@@ -357,6 +367,7 @@ class TwoPlayer_Snake(Game_Mode):
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
             if paused:
+                self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
                 paused = self.pause_screen()
 
             i = self.snake_1.move(delta_x_1, delta_y_1, food_x_y)
