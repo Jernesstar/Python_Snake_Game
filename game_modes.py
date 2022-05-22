@@ -156,10 +156,10 @@ class OnePlayer_Classic_Snake(Game_Mode):
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return True
+                    return (True, False)
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True
+                        return (True, False)
                     if event.key == K_RETURN:
                         return (False, False)
                     if event.key == K_SPACE:
@@ -311,10 +311,10 @@ class TwoPlayer_Snake(Game_Mode):
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return True
+                    return (True, False)
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True 
+                        return (True, False)
                     if event.key == K_RETURN:
                         return (False, False)
                     if event.key == K_SPACE:
