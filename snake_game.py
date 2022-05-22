@@ -1,5 +1,5 @@
 import pygame
-from pygame import K_ESCAPE, KEYDOWN, QUIT
+from pygame import K_DOWN, K_ESCAPE, K_UP, KEYDOWN, QUIT
 from pygame.constants import K_LEFT, K_RETURN, K_RIGHT
 
 from snake import Snake, Control
@@ -23,6 +23,7 @@ class SnakeGame:
     
     black = (0, 0, 0)
     white = (255, 255, 255)
+    grey = (160, 160, 160)
 
     message_font = pygame.font.Font("resources\\pixel_font.ttf", 40)
     option_font = pygame.font.Font("resources\\pixel_font.ttf", 30)
@@ -91,15 +92,23 @@ class SnakeGame:
         x_2 = self.width // 2 + 30
 
         message = "Choose a game mode to play"
-        option_1 = "One Player"
-        option_2 = "Two Player"
         
         text = self.message_font.render(message, True, self.white)
 
         square = pygame.rect.Rect(x_1, y, 170, 50)
         square_2 = pygame.rect.Rect(x_2, y, 170, 50)
 
+        square_3 = pygame.rect.Rect(x_1, y + 60, 170, 50)
+        square_4 = pygame.rect.Rect(x_2, y + 60, 170, 50)
+
         colors = [self.white, self.black]
+
+        show_options_1 = False
+        show_options_2 = False
+
+        color_1 = self.grey
+        color_2 = self.black
+
         if last_selected == 1:
             colors.reverse()
         while True:
@@ -111,34 +120,62 @@ class SnakeGame:
                         self.end()
                     if event.key in (K_LEFT, K_RIGHT):
                         colors.reverse()
-                    if event.key == K_RETURN:
                         if colors[0] == self.white:
-                            return (self.classic_snake, 0)
+                            color_1 = self.grey
+                            color_2 = self.black
                         if colors[1] == self.white:
-                            return (self.two_player, 1)
+                            color_2 = self.grey
+                            color_1 = self.black
+                    if event.key == K_UP:
+                        if colors[0] == self.white:
+                            color_1 = self.grey
+                        if colors[1] == self.white:
+                            color_2 = self.grey
+                    if event.key == K_DOWN:
+                        if colors[0] == self.white:
+                            color_1 = self.white
+                        if colors[1] == self.white:
+                            color_2 = self.white
+                    if event.key == K_RETURN:
+                        if colors[0] == self.white and color_1 == self.grey:
+                            return (self.classic_snake, 0, 1)
+                        if colors[1] == self.white and color_2 == self.grey:
+                            return (self.two_player, 1, 1)
      
             self.game_display.blit(self.background, [0, 0])
+
+            text_1 = self.option_font.render("One Player", True, colors[0])
+            text_2 = self.option_font.render("Two Player", True, colors[1])
+            
+            option_1 = self.option_font.render("Options", True, color_1)
+            option_2 = self.option_font.render("Options", True, color_2)
+
+            pygame.draw.rect(self.game_display, color_1, square_3, 3)
+            pygame.draw.rect(self.game_display, color_2, square_4, 3)
 
             pygame.draw.rect(self.game_display, colors[0], square, 3)
             pygame.draw.rect(self.game_display, colors[1], square_2, 3)
 
-            text_1 = self.option_font.render(option_1, True, colors[0])
-            text_2 = self.option_font.render(option_2, True, colors[1])
-
             self.game_display.blit(
-                text, 
-                [(self.width // 2) - 250, 
-                (self.height // 2) - self.message_font.get_height() - 50]
+                text, [(self.width // 2) - 250, (self.height // 2) - 90]
             )
             self.game_display.blit(
-                text_1, 
-                (square.center[0] - 72, square.center[1] - 12)
+                text_1, (square.center[0] - 72, square.center[1] - 12)
             )
             self.game_display.blit(
-                text_2, 
-                (square_2.center[0] - 74, square_2.center[1] - 12)
+                text_2, (square_2.center[0] - 74, square_2.center[1] - 12)
             )
+            self.game_display.blit(
+                option_1, ((square_3.center[0] - 50, square.center[1] + 45))
+            )
+            self.game_display.blit(
+                option_2, ((square_4.center[0] - 50, square.center[1] + 45))
+            )
+            
             pygame.display.update()
+
+    def option_screen(self):
+        pass
                     
     def end(self):
         pygame.display.quit()
@@ -147,14 +184,15 @@ class SnakeGame:
 
     def play(self):
         self.start_screen()
+
         stop = False
-        game_mode = self.classic_snake
-        
-        last_selected: int = 0
+        selected: int = 0
+        fruit_count: int = 1
+
         while stop == False:
-            (game_mode, last_selected) = self.menu_screen(last_selected)
+            (game_mode, selected, fruit_count) = self.menu_screen(selected)
             self.snake_1.reset()
             self.snake_2.reset()
-            stop = game_mode.run(fruit_count=1)
+            stop = game_mode.run(fruit_count=fruit_count)
 
         self.end()
