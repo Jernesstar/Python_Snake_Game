@@ -2,7 +2,7 @@ from random import randrange, choice
 
 import pygame
 from pygame import (
-    K_ESCAPE, K_RETURN, QUIT, KEYDOWN,
+    K_ESCAPE, K_RETURN, K_SPACE, QUIT, KEYDOWN,
     K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d
 )
 
@@ -161,30 +161,29 @@ class OnePlayer_Classic_Snake(Game_Mode):
                     if event.key == K_ESCAPE:
                         return True
                     if event.key == K_RETURN:
-                        return False
+                        return (False, False)
+                    if event.key == K_SPACE:
+                        return (False, True)
             self.tile_background()
 
             self.game_display.blit(
                 text_1, 
-                [(self.display_width // 2) - 150, 
-                (self.display_height // 2) - self.message_font.get_height()]
+                [(self.display_width // 2) - 125, 
+                (self.display_height // 2) - 40]
             )
             
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 120, 
+                [(self.display_width // 2) - 155, 
                 (self.display_height // 2)]
             )
             self.update()
 
     def run(self, **kwargs):
-        game_over = False
-        paused = False  
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
 
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
-
+        game_over, paused = False, False 
         delta_x, delta_y = 0, 0
-
         try:
             food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
         except:
@@ -203,7 +202,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
-                        event, delta_x, delta_y)
+                        event, delta_x, delta_y)  
             if paused:
                 paused = self.pause_screen()
             
@@ -213,13 +212,10 @@ class OnePlayer_Classic_Snake(Game_Mode):
             if isinstance(food_eaten, bool):
                 if food_eaten:
                     food_x_y = self.rand_x_y(*food_x_y)
-            
             elif isinstance(food_eaten, int):
-                print(food_eaten)
                 if food_eaten != -1:
                     x_y = food_x_y.pop(food_eaten)
                     food_x_y.append(self.rand_x_y(*x_y))
-                    pass
 
             self.tile_background()
 
@@ -318,20 +314,22 @@ class TwoPlayer_Snake(Game_Mode):
                     return True
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True
+                        return True 
                     if event.key == K_RETURN:
-                        return False
+                        return (False, False)
+                    if event.key == K_SPACE:
+                        return (False, True)
                         
             self.tile_background()
 
             self.game_display.blit(
                 text, 
-                [(self.display_width // 2) - 150, 
+                [(self.display_width // 2) - 120, 
                 (self.display_height // 2) - 40]
             )
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 120, 
+                [(self.display_width // 2) - 155, 
                 (self.display_height // 2)]
             )
             self.update()
@@ -343,10 +341,7 @@ class TwoPlayer_Snake(Game_Mode):
         delta_x_1, delta_y_1 = 0, 0
         delta_x_2, delta_y_2 = 0, 0
 
-        game_over_1 = False
-        game_over_2 = False
-        paused = False
-
+        paused, game_over_1, game_over_2 = False, False, False
         try:
             food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
         except:
@@ -366,7 +361,6 @@ class TwoPlayer_Snake(Game_Mode):
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
             if paused:
-                self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
                 paused = self.pause_screen()
 
             i = self.snake_1.move(delta_x_1, delta_y_1, food_x_y)
@@ -377,8 +371,7 @@ class TwoPlayer_Snake(Game_Mode):
 
             if isinstance(i, bool):
                 if i or j:
-                    food_x_y = self.rand_x_y(*food_x_y)
-            
+                    food_x_y = self.rand_x_y(*food_x_y)     
             elif isinstance(i, int):
                 if i != -1:
                     x_y = food_x_y.pop(i)
