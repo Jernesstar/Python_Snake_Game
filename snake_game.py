@@ -83,7 +83,6 @@ class SnakeGame:
                 [(self.width // 2) - 250, 
                 (self.height // 2)]
             )
-            self.clock.tick(self.snake_1.speed)
             self.clock.tick(2)
             colors.reverse()
             pygame.display.update()
@@ -103,7 +102,15 @@ class SnakeGame:
 
         colors = [self.white, self.black]
         color_1, color_2 = self.grey, self.black
-        options_1, options_2 = {}, {}
+
+        options_1 = {
+            "fruit_count": 1,
+            "speed": 10
+        }
+        options_2 = {
+            "fruit_count": 1,
+            "speed": 10
+        }
 
         if last_selected == self.two_player:
             colors.reverse()
@@ -135,9 +142,9 @@ class SnakeGame:
                             color_2 = self.white
                     if event.key == K_RETURN:
                         if color_1 == self.white:
-                            options_1 = self.option_screen()
+                            options_1 = self.option_screen(options_1)
                         if color_2 == self.white:
-                            options_2 = self.option_screen()
+                            options_2 = self.option_screen(options_2)
                         if colors[0] == self.white and color_1 == self.grey:
                             return (self.classic_snake, options_1)
                         if colors[1] == self.white and color_2 == self.grey:
@@ -176,12 +183,13 @@ class SnakeGame:
             )
             pygame.display.update()
 
-    def option_screen(self):
+    def option_screen(self, options):
         x = self.width // 2
         y = self.height // 2
         colors = [self.white, self.black]
-        fruit_count = 1
-        speed = 10
+
+        fruit_count = options["fruit_count"]
+        speed = options["speed"]
 
         message = "Use up and down arrows to change category"
         message_2 = "Press space to change the values"
@@ -246,7 +254,6 @@ class SnakeGame:
     def play(self):
         self.start_screen()
         see_menu, stop = True, False
-        fruit_count: int = 1
         game_mode = self.classic_snake
 
         while stop == False:

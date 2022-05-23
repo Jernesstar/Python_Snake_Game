@@ -11,8 +11,7 @@ class Control(Enum):
 
 class Snake:
 
-    score, size = 0, 10 
-    speed, length = 10, 1
+    score, size, length = 0, 10, 1
     head_x, head_y = 250, 250
 
     def __init__(self, game, name, controls=Control.KEYS):
