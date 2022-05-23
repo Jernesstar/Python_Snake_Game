@@ -33,7 +33,7 @@ class Game_Mode():
         self.display_width = game.width
         self.display_height = game.height
 
-    def run(self, **kwargs):
+    def run(self, options):
         raise NotImplementedError("Child classes should implement this method")
 
     def update(self):
@@ -184,15 +184,17 @@ class OnePlayer_Classic_Snake(Game_Mode):
             )
             self.update()
 
-    def run(self, **kwargs):
+    def run(self, options):
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
 
         game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
         try:
-            food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
+            food_x_y = self.get_fruit_positions(options["fruit_count"])
+            speed = options["speed"]
         except:
             food_x_y = self.rand_x_y(0, 0)
+            speed = 10
 
         while game_over == False:
             for event in pygame.event.get():
@@ -230,7 +232,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.draw_snake()
             self.show_scores()
 
-            self.clock.tick(self.snake_1.speed)
+            self.clock.tick(speed)
             self.update()
             
         return self.game_over_screen()
@@ -319,7 +321,7 @@ class TwoPlayer_Snake(Game_Mode):
             )
             self.update()
         
-    def run(self, **kwargs):        
+    def run(self, options):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y(250, 250)
      
@@ -328,9 +330,12 @@ class TwoPlayer_Snake(Game_Mode):
 
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
-            food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
+            food_x_y = self.get_fruit_positions(options["fruit_count"])
+            speed = options["speed"]
         except:
             food_x_y = self.rand_x_y(0, 0)
+            speed = 10
+
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -371,6 +376,7 @@ class TwoPlayer_Snake(Game_Mode):
             self.draw_snake()
             self.show_scores()
 
-            self.clock.tick(self.snake_1.speed)
+            self.clock.tick(speed)
             self.update()
+            
         return self.winner_screen(snake_1_game_over=game_over_1)

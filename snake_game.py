@@ -102,7 +102,8 @@ class SnakeGame:
         square_4 = pygame.rect.Rect(x_2, y + 60, 170, 50)
 
         colors = [self.white, self.black]
-        color_1, color_2, fruit_count = self.grey, self.black, 1
+        color_1, color_2 = self.grey, self.black
+        options_1, options_2 = {}, {}
 
         if last_selected == self.two_player:
             colors.reverse()
@@ -134,13 +135,13 @@ class SnakeGame:
                             color_2 = self.white
                     if event.key == K_RETURN:
                         if color_1 == self.white:
-                            fruit_count = self.option_screen()
+                            options_1 = self.option_screen()
                         if color_2 == self.white:
-                            fruit_count = self.option_screen()
+                            options_2 = self.option_screen()
                         if colors[0] == self.white and color_1 == self.grey:
-                            return (self.classic_snake, fruit_count)
+                            return (self.classic_snake, options_1)
                         if colors[1] == self.white and color_2 == self.grey:
-                            return (self.two_player, fruit_count)
+                            return (self.two_player, options_2)
      
             self.game_display.blit(self.background, [0, 0])
 
@@ -176,15 +177,18 @@ class SnakeGame:
             pygame.display.update()
 
     def option_screen(self):
-        x_1 = self.width // 2
+        x = self.width // 2
         y = self.height // 2
-
-        colors = [self.white]
+        colors = [self.white, self.black]
         fruit_count = 1
+        speed = 10
 
+        message = "Use up and down arrows to change category"
+        message_2 = "Press space to change the values"
+        text = self.option_font.render(message, True, self.white)
+        text_2 = self.option_font.render(message_2, True, self.white)
         option_text = self.message_font.render("Options", True, self.white)
-        fruits_text = self.option_font.render("Fruit Number", True, self.white)
-
+            
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -193,26 +197,45 @@ class SnakeGame:
                     if event.key == K_ESCAPE:
                         self.end()
                     if event.key == K_RETURN:
-                        return fruit_count
+                        return {
+                            "fruit_count": fruit_count,
+                            "speed": speed
+                        }
+                    if event.key in (K_UP, K_DOWN):
+                        colors.reverse()
                     if event.key == K_SPACE:
                         if colors[0] == self.white:
                             if fruit_count < 11:
                                 fruit_count += 1
                             if fruit_count == 11:
                                 fruit_count = 1
-            fruit_num_text = self.option_font.render(
-                str(fruit_count), True, self.white)
-            
+                        if colors[1] == self.white:
+                            if speed <= 20:
+                                speed += 1
+                            if speed == 21:
+                                speed = 10
+            fruits_text = self.option_font.render(
+                "Number of Fruits", True, colors[0]
+            )
+            fruit_num = self.option_font.render(
+                str(fruit_count), True, colors[0]
+            )
+            speed_text = self.option_font.render(
+                "Snake Speed", True, colors[1]
+            )
+            speed_num = self.option_font.render(str(speed), True, colors[1])
+
             self.game_display.blit(self.background, [0, 0])
-            self.game_display.blit(option_text, [self.width // 2 - 80, 60])
-            self.game_display.blit(
-                fruits_text, 
-                [x_1 - 170, y - 90]
-            )
-            self.game_display.blit(
-                fruit_num_text, 
-                [x_1 + 60, y - 90]
-            )
+            self.game_display.blit(option_text, [x - 80, 60])
+
+            self.game_display.blit(text, [x - 310, 100])
+            self.game_display.blit(text_2, [x - 220, 140])
+
+            self.game_display.blit(fruits_text, [x - 210, y - 60])
+            self.game_display.blit(fruit_num, [x + 70, y - 60])
+
+            self.game_display.blit(speed_text, [x - 210, y - 20])
+            self.game_display.blit(speed_num, [x + 70, y - 20])
             pygame.display.update()
                     
     def end(self):
@@ -222,16 +245,15 @@ class SnakeGame:
 
     def play(self):
         self.start_screen()
-
         see_menu, stop = True, False
         fruit_count: int = 1
         game_mode = self.classic_snake
 
         while stop == False:
             if see_menu:
-                (game_mode, fruit_count) = self.menu_screen(game_mode)
+                (game_mode, options) = self.menu_screen(game_mode)
             self.snake_1.reset()
             self.snake_2.reset()
-            (stop, see_menu) = game_mode.run(fruit_count=fruit_count)
+            (stop, see_menu) = game_mode.run(options=options)
 
         self.end()
