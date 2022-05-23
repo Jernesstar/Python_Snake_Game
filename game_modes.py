@@ -53,14 +53,13 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        for x in range(0, self.display_width, self.snake_1.size):
-            for i, y in enumerate(
-                range(0, self.display_height, self.snake_1.size)
-            ):
+        size = self.snake_1.size
+        for x in range(self.display_width // size):
+            for y in range(self.display_height // size):
                 pygame.draw.rect(
                     self.game_display,
-                    colors[i % 2],
-                    [x, y, self.snake_1.size, self.snake_1.size]
+                    colors[y % 2],
+                    [x * size, y * size, size, size]
                 )
             colors.reverse()
 
@@ -72,8 +71,8 @@ class Game_Mode():
         )
         self.game_display.blit(text_1, [3, 0])
 
-    def draw_snake(self, pixels):
-        for x, y, in pixels:
+    def draw_snake(self):
+        for x, y, in self.snake_1.pixels:
             pygame.draw.rect(
                 self.game_display,
                 self.black,
@@ -98,7 +97,11 @@ class Game_Mode():
 
     def pause_screen(self):
         message = "Paused. Press return key to continue"
+        message_2 = "Press space to return to menu screen"
+
         text = self.message_font.render(message, True, self.red)
+        text_2 = self.message_font.render(message_2, True, self.red)
+
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -109,11 +112,16 @@ class Game_Mode():
                     if event.key == K_SPACE:
                         return True
             self.tile_background()
-            self.draw_snake(self.snake_1.pixels)
+            self.draw_snake()
             self.game_display.blit(
                 text, 
-                [(self.display_width // 2) - 200, 
-                (self.display_height // 2) - self.score_font.get_height()]
+                [(self.display_width // 2) - 220, 
+                (self.display_height // 2) - 40]
+            )
+            self.game_display.blit(
+                text_2, 
+                [(self.display_width // 2) - 220, 
+                (self.display_height // 2)]
             )
             self.update()
         
@@ -219,7 +227,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.tile_background()
 
             self.draw_fruit(food_x_y)
-            self.draw_snake(self.snake_1.pixels)
+            self.draw_snake()
             self.show_scores()
 
             self.clock.tick(self.snake_1.speed)
@@ -248,14 +256,14 @@ class TwoPlayer_Snake(Game_Mode):
         else:
             return self.rand_x_y(old_x, old_y)
 
-    def draw_snakes(self, pixels_1, pixels_2):
-        for x, y, in pixels_1:
+    def draw_snake(self):
+        for x, y, in self.snake_1.pixels:
             pygame.draw.rect(
                 self.game_display, 
                 self.black, 
                 [x, y, self.snake_1.size, self.snake_1.size]
             )
-        for x, y, in pixels_2:
+        for x, y, in self.snake_2.pixels:
             pygame.draw.rect(
                 self.game_display, 
                 self.red, 
@@ -273,28 +281,6 @@ class TwoPlayer_Snake(Game_Mode):
         )
         self.game_display.blit(text_1, [3, 0])
         self.game_display.blit(text_2, [3, self.score_font.get_height()])
-
-    def pause_screen(self):
-        message = "Paused. Press return key to continue"
-        text = self.message_font.render(
-            message, True, self.red
-        )
-
-        while True:
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    self.end()
-                elif event.type == KEYDOWN:
-                    if event.key == K_RETURN:
-                        return
-            self.tile_background()
-            self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
-            self.game_display.blit(
-                text, 
-                [(self.display_width // 2) - 200, 
-                (self.display_height // 2) - self.score_font.get_height()]
-            )
-            self.update()
     
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
@@ -302,7 +288,7 @@ class TwoPlayer_Snake(Game_Mode):
             self.snake_1.score if not snake_1_game_over else self.snake_2.score
         )
         message = f"{winner_name} wins, score {winner_score}"
-        message_2 = "Press return to continue"
+        message_2 = "Press return to play again"
 
         text = self.message_font.render(message, True, self.red)
         text_2 = self.message_font.render(message_2, True, self.red)
@@ -382,7 +368,7 @@ class TwoPlayer_Snake(Game_Mode):
             self.tile_background()
 
             self.draw_fruit(food_x_y)
-            self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
+            self.draw_snake()
             self.show_scores()
 
             self.clock.tick(self.snake_1.speed)

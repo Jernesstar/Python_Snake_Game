@@ -91,14 +91,18 @@ class Snake:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_UP else self.size
             return (delta_x, delta_y)
+
+        current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
+        current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
+
         if event.key in (K_LEFT, K_RIGHT):
             """Snake is moving up or down"""
-            if delta_x == 0:
+            if current_delta_x == 0:
                 delta_x = -self.size if event.key == K_LEFT else self.size
                 delta_y = 0
         elif event.key in (K_UP, K_DOWN):
             """Snake is going left or right"""
-            if delta_y == 0:
+            if current_delta_y == 0:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_UP else self.size
         return (delta_x, delta_y)
@@ -119,14 +123,18 @@ class Snake:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_w else self.size
             return (delta_x, delta_y)
+
+        current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
+        current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
+
         if event.key in (K_a, K_d):
             """Snake is going up or down"""
-            if delta_x == 0:
+            if current_delta_x == 0:
                 delta_x = -self.size if event.key == K_a else self.size
                 delta_y = 0
         elif event.key in (K_w, K_s):
             """Snake is going left or right"""
-            if delta_y == 0:
+            if current_delta_y == 0:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_w else self.size
                 """Snake is going down"""
