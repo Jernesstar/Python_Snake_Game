@@ -58,7 +58,6 @@ class Snake:
                 self.length += 1
                 return True
             return False
-
         elif isinstance(food_coordinates, list):
             for i, food_x_y in enumerate(food_coordinates):
                 if (self.head_x, self.head_y) == food_x_y:
@@ -70,7 +69,6 @@ class Snake:
     def move(self, delta_x, delta_y, food_coordinates):
         self.head_x += delta_x
         self.head_y += delta_y
-
         self.pixels.append((self.head_x, self.head_y))
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
@@ -109,7 +107,6 @@ class Snake:
         """
         if self.pixels == []:
             return (0, 0)
-            
         if len(self.pixels) == 1:
             if event.key in (K_LEFT, K_RIGHT):
                 delta_x = -self.size if event.key == K_LEFT else self.size
@@ -118,36 +115,18 @@ class Snake:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_UP else self.size
             return (delta_x, delta_y)
-
         if event.key in (K_LEFT, K_RIGHT):
             current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
-            """Snake is moving left"""
-            if (current_delta_x) < 0:
-                delta_x = -self.size
-                delta_y = 0
-                """Snake is moving up or down"""
-            elif (current_delta_x) == 0:
+            """Snake is moving up or down"""
+            if current_delta_x == 0:
                 delta_x = -self.size if event.key == K_LEFT else self.size
                 delta_y = 0
-                """Snake is moving right"""
-            elif (current_delta_x) > 0:
-                delta_x = self.size
-                delta_y = 0
-
         elif event.key in (K_UP, K_DOWN):
             current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
-            """Snake is going up"""
-            if (current_delta_y) < 0:
-                delta_x = 0
-                delta_y = -self.size
-                """Snake is going left or right"""
-            elif (current_delta_y) == 0:
+            """Snake is going left or right"""
+            if current_delta_y == 0:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_UP else self.size
-                """Snake is going down"""
-            elif (current_delta_y) > 0:
-                delta_x = 0
-                delta_y = self.size
         return (delta_x, delta_y)
         
     def get_directions_wasd(self, event: pygame.event, delta_x, delta_y):
@@ -176,8 +155,7 @@ class Snake:
         `self.pixels`
         """
         if self.pixels == []:
-            return (0, 0)
-            
+            return (0, 0) 
         if len(self.pixels) == 1:
             if event.key in (K_a, K_d):
                 delta_x = -self.size if event.key == K_a else self.size
@@ -186,34 +164,17 @@ class Snake:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_w else self.size
             return (delta_x, delta_y)
-
         if event.key in (K_a, K_d):
             current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
-            """Snake is going left"""
-            if (current_delta_x) < 0:
-                delta_x = -self.size
-                delta_y = 0
-                """Snake is going up or down"""
-            elif (current_delta_x) == 0:
+            """Snake is going up or down"""
+            if current_delta_x == 0:
                 delta_x = -self.size if event.key == K_a else self.size
                 delta_y = 0
-                """Snake is going right"""
-            elif (current_delta_x) > 0:
-                delta_x = self.size
-                delta_y = 0
-
         elif event.key in (K_w, K_s):
             current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
-            """Snake is going up"""
-            if (current_delta_y) < 0:
-                delta_x = 0
-                delta_y = -self.size
-                """Snake is going left or right"""
-            elif (current_delta_y) == 0:
+            """Snake is going left or right"""
+            if current_delta_y == 0:
                 delta_x = 0
                 delta_y = -self.size if event.key == K_w else self.size
                 """Snake is going down"""
-            elif (current_delta_y) > 0:
-                delta_x = 0
-                delta_y = self.size
         return (delta_x, delta_y)
