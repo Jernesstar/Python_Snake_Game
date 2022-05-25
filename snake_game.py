@@ -22,6 +22,7 @@ class SnakeGame:
     snake_2: Snake
 
     width, height = 1000, 600
+    dimensions = (width, height)
     
     black = (0, 0, 0)
     white = (255, 255, 255)
@@ -30,28 +31,22 @@ class SnakeGame:
     message_font = pygame.font.Font("resources\\pixel_font.ttf", 40)
     option_font = pygame.font.Font("resources\\pixel_font.ttf", 30)
 
-    def __init__(self, name_1, name_2 = ""):
+    def __init__(self, size):
         self.clock = pygame.time.Clock()
-        
-        self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
-        self.snake_1.size = 50
-    
-        if name_2 != "":
-            self.snake_2 = Snake(game=self, name=name_2, controls=Control.WASD)
-            self.snake_2.size = 50
-            
-        self.width += self.width % self.snake_1.size
-        self.height += self.height % self.snake_1.size
-        
+
+        self.square_size = size
+        self.width += self.width % size
+        self.height += self.height % size
+
         self.game_display = pygame.display.set_mode((self.width, self.height))
 
-        self.background = pygame.image.load("resources\\start_bg.png").convert()
-        self.background = pygame.transform.scale(self.background, 
-            (self.width, self.height))
-        
-        self.classic_snake = OnePlayer_Classic_Snake(game=self)
-        if name_2 != "":
-            self.two_player = TwoPlayer_Snake(game=self)
+        background = pygame.image.load("resources\\start_bg.png").convert()
+        self.background = pygame.transform.scale(background, self.dimensions)
+
+        self.snake_1 = None
+        self.snake_2 = None
+        self.classic_snake = None
+        self.two_player = None
 
     def start_screen(self):
         main_message = "Snake 2.0"
@@ -86,9 +81,8 @@ class SnakeGame:
             messages.reverse()
             pygame.display.update()
 
-    def prompt_name_screen(self):
+    def prompt_name_screen(self, message):
         name = ""
-        message = "Please enter your username"
         text = self.message_font.render(message, True, self.white)
         name_text = self.option_font.render(name, True, self.white)
         x = self.width // 2 - 250
@@ -285,8 +279,6 @@ class SnakeGame:
 
     def play(self):
         see_menu, stop = True, False
-        game_mode = self.classic_snake
-
         options_1 = {
             "fruit_count": 1,
             "speed": 10
@@ -297,14 +289,26 @@ class SnakeGame:
         }
 
         self.start_screen()
-        self.prompt_name_screen()
+        name_1 = self.prompt_name_screen("Enter your player name")
+
+        self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
+
+        self.classic_snake = OnePlayer_Classic_Snake(game=self)
+        game_mode = self.classic_snake
 
         while stop == False:
             if see_menu:
                 (game_mode, options) = self.menu_screen(
                     game_mode, options_1, options_2)
+            if game_mode == None:
+                name_2 = self.prompt_name_screen("Enter player 2 name")
+                self.snake_2 = Snake(self, name=name_2, controls=Control.WASD)
+                self.two_player = TwoPlayer_Snake(game=self)
+                game_mode = self.two_player
+
             self.snake_1.reset()
-            self.snake_2.reset()
+            if self.snake_2:
+                self.snake_2.reset()
             (stop, see_menu) = game_mode.run(options=options)
 
         self.end()
