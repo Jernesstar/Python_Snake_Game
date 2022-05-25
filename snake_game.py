@@ -57,10 +57,9 @@ class SnakeGame:
     def start_screen(self):
         message = "Snake 2.0"
         message_2 = "Press any key to continue"
-
         text_2 = self.message_font.render(message_2, True, self.white)
-       
         colors = [self.black, self.white]
+        
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -87,7 +86,7 @@ class SnakeGame:
             colors.reverse()
             pygame.display.update()
 
-    def menu_screen(self, last_selected) -> tuple[Game_Mode, int]:
+    def menu_screen(self, last_selected) -> tuple[Game_Mode, dict]:
         x_1 = self.width // 2 - 220
         y = self.height // 2
         x_2 = self.width // 2 + 30
