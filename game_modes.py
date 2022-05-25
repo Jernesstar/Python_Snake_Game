@@ -1,9 +1,11 @@
-from random import randrange, choice
+from random import randrange
 
 import pygame
 from pygame import (
-    K_ESCAPE, K_RETURN, K_SPACE, QUIT, KEYDOWN,
-    K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d
+    QUIT, KEYDOWN,
+    K_ESCAPE, K_RETURN, K_SPACE,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT, 
+    K_w, K_s, K_a, K_d
 )
 
 from snake import Snake
@@ -109,6 +111,8 @@ class Game_Mode():
                 elif event.type == KEYDOWN:
                     if event.key == K_RETURN:
                         return False
+                    if event.key == K_ESCAPE:
+                        self.end()
                     if event.key == K_SPACE:
                         return True
             self.tile_background()

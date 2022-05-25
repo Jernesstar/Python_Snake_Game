@@ -1,9 +1,9 @@
 from enum import Enum
 
+import pygame
 from pygame import (
     K_LEFT, K_RIGHT, K_UP, K_DOWN, K_a, K_d, K_w, K_s
 )
-import pygame
 
 class Control(Enum):
     KEYS = 1
