@@ -86,7 +86,7 @@ class SnakeGame:
             colors.reverse()
             pygame.display.update()
 
-    def menu_screen(self, last_selected) -> tuple[Game_Mode, dict]:
+    def menu_screen(self, last_selected: Game_Mode, options_1, options_2):
         x_1 = self.width // 2 - 220
         y = self.height // 2
         x_2 = self.width // 2 + 30
@@ -101,15 +101,6 @@ class SnakeGame:
 
         colors = [self.white, self.black]
         color_1, color_2 = self.grey, self.black
-
-        options_1 = {
-            "fruit_count": 1,
-            "speed": 10
-        }
-        options_2 = {
-            "fruit_count": 1,
-            "speed": 10
-        }
 
         if last_selected == self.two_player:
             colors.reverse()
@@ -141,9 +132,9 @@ class SnakeGame:
                             color_2 = self.white
                     if event.key == K_RETURN:
                         if color_1 == self.white:
-                            options_1 = self.option_screen(options_1)
+                            self.option_screen(options_1)
                         if color_2 == self.white:
-                            options_2 = self.option_screen(options_2)
+                            self.option_screen(options_2)
                         if colors[0] == self.white and color_1 == self.grey:
                             return (self.classic_snake, options_1)
                         if colors[1] == self.white and color_2 == self.grey:
@@ -204,10 +195,9 @@ class SnakeGame:
                     if event.key == K_ESCAPE:
                         self.end()
                     if event.key == K_RETURN:
-                        return {
-                            "fruit_count": fruit_count,
-                            "speed": speed
-                        }
+                        options["fruit_count"] = fruit_count
+                        options["speed"] = speed
+                        return
                     if event.key in (K_UP, K_DOWN):
                         colors.reverse()
                     if event.key == K_SPACE:
@@ -230,7 +220,9 @@ class SnakeGame:
             speed_text = self.option_font.render(
                 "Snake Speed", True, colors[1]
             )
-            speed_num = self.option_font.render(str(speed), True, colors[1])
+            speed_num = self.option_font.render(
+                str(speed), True, colors[1]
+            )
 
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(option_text, [x - 80, 60])
@@ -251,13 +243,24 @@ class SnakeGame:
         quit()
 
     def play(self):
-        self.start_screen()
         see_menu, stop = True, False
         game_mode = self.classic_snake
 
+        options_1 = {
+            "fruit_count": 1,
+            "speed": 10
+        }
+        options_2 = {
+            "fruit_count": 1,
+            "speed": 10
+        }
+
+        self.start_screen()
+
         while stop == False:
             if see_menu:
-                (game_mode, options) = self.menu_screen(game_mode)
+                (game_mode, options) = self.menu_screen(
+                    game_mode, options_1, options_2)
             self.snake_1.reset()
             self.snake_2.reset()
             (stop, see_menu) = game_mode.run(options=options)
