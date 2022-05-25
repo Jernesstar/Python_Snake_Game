@@ -1,10 +1,11 @@
-from random import randrange, choice
-from functools import singledispatchmethod
+from random import randrange
 
 import pygame
 from pygame import (
-    K_ESCAPE, K_RETURN, QUIT, KEYDOWN,
-    K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d
+    QUIT, KEYDOWN,
+    K_ESCAPE, K_RETURN, K_SPACE,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT, 
+    K_w, K_s, K_a, K_d
 )
 
 from snake import Snake
@@ -34,7 +35,7 @@ class Game_Mode():
         self.display_width = game.width
         self.display_height = game.height
 
-    def run(self, **kwargs):
+    def run(self, options):
         raise NotImplementedError("Child classes should implement this method")
 
     def update(self):
@@ -54,18 +55,15 @@ class Game_Mode():
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
-        tile_count_even = (self.display_width // self.snake_1.size) % 2 == 0
-
-        for x in range(0, self.display_width, self.snake_1.size):
-            for y in range(0, self.display_height, self.snake_1.size):
+        size = self.snake_1.size
+        for x in range(self.display_width // size):
+            for y in range(self.display_height // size):
                 pygame.draw.rect(
                     self.game_display,
-                    colors[0],
-                    [x, y, self.snake_1.size, self.snake_1.size]
+                    colors[y % 2],
+                    [x * size, y * size, size, size]
                 )
-                colors.reverse()
-            if tile_count_even:
-                colors.reverse()
+            colors.reverse()
 
     def show_scores(self):
         message = f"{self.snake_1.name}'s score: {self.snake_1.score}"
@@ -75,8 +73,8 @@ class Game_Mode():
         )
         self.game_display.blit(text_1, [3, 0])
 
-    def draw_snake(self, pixels):
-        for x, y, in pixels:
+    def draw_snake(self):
+        for x, y, in self.snake_1.pixels:
             pygame.draw.rect(
                 self.game_display,
                 self.black,
@@ -101,9 +99,10 @@ class Game_Mode():
 
     def pause_screen(self):
         message = "Paused. Press return key to continue"
-        text = self.message_font.render(
-            message, True, self.red
-        )
+        message_2 = "Press space to return to menu screen"
+
+        text = self.message_font.render(message, True, self.red)
+        text_2 = self.message_font.render(message_2, True, self.red)
 
         while True:
             for event in pygame.event.get():
@@ -111,16 +110,24 @@ class Game_Mode():
                     self.end()
                 elif event.type == KEYDOWN:
                     if event.key == K_RETURN:
-                        return
-
+                        return False
+                    if event.key == K_ESCAPE:
+                        self.end()
+                    if event.key == K_SPACE:
+                        return True
             self.tile_background()
-            self.draw_snake(self.snake_1.pixels)
-
+            self.draw_snake()
             self.game_display.blit(
                 text, 
-                [(self.display_width // 2) - 200, 
-                (self.display_height // 2) - self.score_font.get_height()]
+                [(self.display_width // 2) - 220, 
+                (self.display_height // 2) - 40]
             )
+            self.game_display.blit(
+                text_2, 
+                [(self.display_width // 2) - 220, 
+                (self.display_height // 2)]
+            )
+            self.update()
         
     def check_for_pause(self, paused, event: pygame.event):
         if event.key == K_RETURN:
@@ -158,79 +165,78 @@ class OnePlayer_Classic_Snake(Game_Mode):
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return True
+                    return (True, False)
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True
+                        return (True, False)
                     if event.key == K_RETURN:
-                        return False
+                        return (False, False)
+                    if event.key == K_SPACE:
+                        return (False, True)
             self.tile_background()
 
             self.game_display.blit(
                 text_1, 
-                [(self.display_width // 2) - 150, 
-                (self.display_height // 2) - self.message_font.get_height()]
+                [(self.display_width // 2) - 125, 
+                (self.display_height // 2) - 40]
             )
             
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 120, 
+                [(self.display_width // 2) - 155, 
                 (self.display_height // 2)]
             )
             self.update()
 
-    def run(self, **kwargs):
-        game_over = False
-        paused = False  
+    def run(self, options):
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
 
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250) 
-
+        game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
-
         try:
-            food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
+            food_x_y = self.get_fruit_positions(options["fruit_count"])
+            speed = options["speed"]
         except:
             food_x_y = self.rand_x_y(0, 0)
+            speed = 10
 
         while game_over == False:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return True 
+                    return (True, False)
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True
+                        return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
                     # Since only one snake, allow for KEYS or WASD    
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
-                        event, delta_x, delta_y)
+                        event, delta_x, delta_y)  
             if paused:
-                self.pause_screen()
-            
+                see_menu = self.pause_screen()
+            if see_menu:
+                return (False, True)
+            paused = False
             food_eaten = self.snake_1.move(delta_x, delta_y, food_x_y)
             game_over = self.snake_1.check_for_game_over(game_over)
             
             if isinstance(food_eaten, bool):
                 if food_eaten:
                     food_x_y = self.rand_x_y(*food_x_y)
-            
             elif isinstance(food_eaten, int):
-                print(food_eaten)
                 if food_eaten != -1:
                     x_y = food_x_y.pop(food_eaten)
                     food_x_y.append(self.rand_x_y(*x_y))
-                    pass
 
             self.tile_background()
 
             self.draw_fruit(food_x_y)
-            self.draw_snake(self.snake_1.pixels)
+            self.draw_snake()
             self.show_scores()
 
-            self.clock.tick(self.snake_1.speed)
-
+            self.clock.tick(speed)
             self.update()
             
         return self.game_over_screen()
@@ -249,17 +255,6 @@ class TwoPlayer_Snake(Game_Mode):
         self.display_width = game.width
         self.display_height = game.height
 
-    def pause_screen(self):
-        message = "Paused. Press any key to continue"
-        text = self.message_font.render(message, True, self.red)
-        self.tile_background()
-        self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
-        self.game_display.blit(
-            text, 
-            [(self.display_width // 2) - 200, 
-            (self.display_height // 2) - self.score_font.get_height()]
-        )
-
     def rand_x_y(self, old_x, old_y):
         (rand_x, rand_y) = super().rand_x_y(old_x, old_y)
         if (rand_x, rand_y) not in self.snake_2.pixels:
@@ -267,14 +262,14 @@ class TwoPlayer_Snake(Game_Mode):
         else:
             return self.rand_x_y(old_x, old_y)
 
-    def draw_snakes(self, pixels_1, pixels_2):
-        for x, y, in pixels_1:
+    def draw_snake(self):
+        for x, y, in self.snake_1.pixels:
             pygame.draw.rect(
                 self.game_display, 
                 self.black, 
                 [x, y, self.snake_1.size, self.snake_1.size]
             )
-        for x, y, in pixels_2:
+        for x, y, in self.snake_2.pixels:
             pygame.draw.rect(
                 self.game_display, 
                 self.red, 
@@ -299,7 +294,7 @@ class TwoPlayer_Snake(Game_Mode):
             self.snake_1.score if not snake_1_game_over else self.snake_2.score
         )
         message = f"{winner_name} wins, score {winner_score}"
-        message_2 = "Press return to continue"
+        message_2 = "Press return to play again"
 
         text = self.message_font.render(message, True, self.red)
         text_2 = self.message_font.render(message_2, True, self.red)
@@ -307,50 +302,51 @@ class TwoPlayer_Snake(Game_Mode):
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return True
+                    return (True, False)
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True
+                        return (True, False)
                     if event.key == K_RETURN:
-                        return False
+                        return (False, False)
+                    if event.key == K_SPACE:
+                        return (False, True)
                         
             self.tile_background()
 
             self.game_display.blit(
                 text, 
-                [(self.display_width // 2) - 150, 
+                [(self.display_width // 2) - 120, 
                 (self.display_height // 2) - 40]
             )
             self.game_display.blit(
                 text_2,
-                [(self.display_width // 2) - 120, 
+                [(self.display_width // 2) - 155, 
                 (self.display_height // 2)]
             )
             self.update()
         
-    def run(self, **kwargs):        
+    def run(self, options):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y(250, 250)
-            
+     
         delta_x_1, delta_y_1 = 0, 0
         delta_x_2, delta_y_2 = 0, 0
 
-        game_over_1 = False
-        game_over_2 = False
-        paused = False
-
+        paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
-            food_x_y = self.get_fruit_positions(kwargs["fruit_count"])
+            food_x_y = self.get_fruit_positions(options["fruit_count"])
+            speed = options["speed"]
         except:
             food_x_y = self.rand_x_y(0, 0)
+            speed = 10
 
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    return True
+                    return (True, False)
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return True
+                        return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
                     (delta_x_1, delta_y_1) = self.snake_1.directions(
@@ -358,8 +354,10 @@ class TwoPlayer_Snake(Game_Mode):
                     (delta_x_2, delta_y_2) = self.snake_2.directions(
                         event, delta_x_2, delta_y_2)
             if paused:
-                self.pause_screen()
-
+                see_menu = self.pause_screen()
+            if see_menu:
+                return (False, True)
+            paused = False
             i = self.snake_1.move(delta_x_1, delta_y_1, food_x_y)
             j = self.snake_2.move(delta_x_2, delta_y_2, food_x_y)
 
@@ -368,8 +366,7 @@ class TwoPlayer_Snake(Game_Mode):
 
             if isinstance(i, bool):
                 if i or j:
-                    food_x_y = self.rand_x_y(*food_x_y)
-            
+                    food_x_y = self.rand_x_y(*food_x_y)     
             elif isinstance(i, int):
                 if i != -1:
                     x_y = food_x_y.pop(i)
@@ -377,14 +374,13 @@ class TwoPlayer_Snake(Game_Mode):
                 if j != -1:
                     x_y = food_x_y.pop(j)
                     food_x_y.append(self.rand_x_y(*x_y))
-
             self.tile_background()
 
             self.draw_fruit(food_x_y)
-            self.draw_snakes(self.snake_1.pixels, self.snake_2.pixels)
+            self.draw_snake()
             self.show_scores()
 
-            self.clock.tick(self.snake_1.speed)
+            self.clock.tick(speed)
             self.update()
-
+            
         return self.winner_screen(snake_1_game_over=game_over_1)
