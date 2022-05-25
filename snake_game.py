@@ -1,11 +1,11 @@
+import time
 import pygame
 from pygame import (
-    K_DOWN, K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT,
-    K_LEFT, K_RETURN, K_RIGHT
-) 
+    QUIT, KEYDOWN, K_BACKSPACE, K_ESCAPE, K_SPACE, K_RETURN,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT
+)
 
 from snake import Snake, Control
-
 from game_modes import (
     Game_Mode,
     OnePlayer_Classic_Snake,
@@ -45,8 +45,7 @@ class SnakeGame:
         
         self.game_display = pygame.display.set_mode((self.width, self.height))
 
-        self.background = pygame.image.load(
-            "resources\\start_bg.png").convert()
+        self.background = pygame.image.load("resources\\start_bg.png").convert()
         self.background = pygame.transform.scale(self.background, 
             (self.width, self.height))
         
@@ -55,9 +54,8 @@ class SnakeGame:
             self.two_player = TwoPlayer_Snake(game=self)
 
     def start_screen(self):
-        message = "Snake 2.0"
-        message_2 = "Press any key to continue"
-        text_2 = self.message_font.render(message_2, True, self.white)
+        main_message = "Snake 2.0"
+        messages = ["Press any key to continue_", "Press any key to continue"]
         colors = [self.black, self.white]
         
         while True:
@@ -69,7 +67,8 @@ class SnakeGame:
                         self.end()
                     else:
                         return
-            text = self.message_font.render(message, True, colors[0])
+            text = self.message_font.render(main_message, True, colors[0])
+            text_2 = self.message_font.render(messages[0], True, self.white)
         
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(
@@ -84,6 +83,48 @@ class SnakeGame:
             )
             self.clock.tick(2)
             colors.reverse()
+            messages.reverse()
+            pygame.display.update()
+
+    def prompt_name_screen(self):
+        name = ""
+        message = "Please enter your username"
+        text = self.message_font.render(message, True, self.white)
+        name_text = self.option_font.render(name, True, self.white)
+        x = self.width // 2 - 250
+        y = self.height // 2
+
+        rect = pygame.rect.Rect((x, y - 20), (500, 50))
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.end()
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        self.end()
+                    elif event.key == K_RETURN:
+                        return name
+                    elif event.key == K_BACKSPACE and len(name) > 0:
+                        name = name[:-1]
+                        continue
+                    name += event.unicode
+            name_text = self.option_font.render(name, True, self.white)
+            self.game_display.blit(self.background, [0, 0])
+            self.game_display.blit(text, [x, y - 120])
+            self.game_display.blit(
+                name_text, 
+                [(rect.center[0] - 7.5 * len(name)), rect.topleft[1] + 13] 
+            )
+            pygame.draw.rect(self.game_display, self.white, rect, 3)
+
+            cursor = pygame.rect.Rect(
+                (rect.center[0] + 7.5 * len(name), rect.topleft[1] + 8),
+                (3, 35)
+            )
+            if time.time() % 1 > 0.5:
+                pygame.draw.rect(self.game_display, self.white, cursor)
+
             pygame.display.update()
 
     def menu_screen(self, last_selected: Game_Mode, options_1, options_2):
@@ -256,6 +297,7 @@ class SnakeGame:
         }
 
         self.start_screen()
+        self.prompt_name_screen()
 
         while stop == False:
             if see_menu:
