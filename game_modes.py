@@ -8,11 +8,11 @@ from pygame import (
     K_w, K_s, K_a, K_d
 )
 
-from snake import Snake
+from sprites import Snake, Apple
 
 pygame.init()
 
-class Game_Mode():
+class Game_Mode:
 
     snake_1: Snake
     clock: pygame.time.Clock
@@ -82,20 +82,13 @@ class Game_Mode():
             )
 
     def draw_fruit(self, coordinates):
+        apple = Apple(self.snake_1.size)
+        image = apple.image
         if isinstance(coordinates, tuple):
-            (x, y) = coordinates
-            pygame.draw.rect(
-                self.game_display, 
-                self.orange, 
-                [x, y, self.snake_1.size, self.snake_1.size]
-            )
+            self.game_display.blit(image, coordinates)
         elif isinstance(coordinates, list):
-            for x, y in coordinates:
-                pygame.draw.rect(
-                    self.game_display, 
-                    self.orange, 
-                    [x, y, self.snake_1.size, self.snake_1.size]
-                )
+            for x_y in coordinates:
+                self.game_display.blit(image, x_y)
 
     def pause_screen(self):
         message = "Paused. Press return key to continue"

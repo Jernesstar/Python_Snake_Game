@@ -5,7 +5,8 @@ from pygame import (
     K_UP, K_DOWN, K_LEFT, K_RIGHT
 )
 
-from snake import Snake, Control
+from sprites import Snake
+
 from game_modes import (
     Game_Mode,
     OnePlayer_Classic_Snake,
@@ -105,16 +106,17 @@ class SnakeGame:
                     name += event.unicode
             name_text = self.option_font.render(name, True, self.white)
             self.game_display.blit(self.background, [0, 0])
+    
             self.game_display.blit(text, [x, y - 120])
+            offset = self.option_font.size(name)[0] // 2
+
             self.game_display.blit(
                 name_text, 
-                [(rect.center[0] - 7.5 * len(name)), rect.topleft[1] + 13] 
+                [(rect.center[0] - offset), rect.topleft[1] + 13] 
             )
             pygame.draw.rect(self.game_display, self.white, rect, 3)
-
             cursor = pygame.rect.Rect(
-                (rect.center[0] + 7.5 * len(name), rect.topleft[1] + 8),
-                (3, 35)
+                (rect.center[0] + offset, rect.topleft[1] + 8), (3, 35)
             )
             if time.time() % 1 > 0.5:
                 pygame.draw.rect(self.game_display, self.white, cursor)
@@ -291,7 +293,7 @@ class SnakeGame:
         self.start_screen()
         name_1 = self.prompt_name_screen("Enter your player name")
 
-        self.snake_1 = Snake(game=self, name=name_1, controls=Control.KEYS)
+        self.snake_1 = Snake(self, name_1, Snake.Controls.KEYS)
 
         self.classic_snake = OnePlayer_Classic_Snake(game=self)
         game_mode = self.classic_snake
@@ -302,7 +304,7 @@ class SnakeGame:
                     game_mode, options_1, options_2)
             if game_mode == None:
                 name_2 = self.prompt_name_screen("Enter player 2 name")
-                self.snake_2 = Snake(self, name=name_2, controls=Control.WASD)
+                self.snake_2 = Snake(self, name_2, Snake.Controls.WASD)
                 self.two_player = TwoPlayer_Snake(game=self)
                 game_mode = self.two_player
 
