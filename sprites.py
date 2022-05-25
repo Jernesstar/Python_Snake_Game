@@ -55,7 +55,7 @@ class Snake:
             return True
         return False
 
-    def when_eat_food(self, food_coordinates):
+    def check_for_food_eaten(self, food_coordinates):
         if isinstance(food_coordinates, tuple):
             if (self.head_x, self.head_y) == food_coordinates:
                 self.score += 1
@@ -70,18 +70,17 @@ class Snake:
                     return i
             return -1
             
-    def move(self, delta_x, delta_y, food_coordinates):
+    def move(self, delta_x, delta_y):
         self.head_x += delta_x
         self.head_y += delta_y
         self.pixels.append((self.head_x, self.head_y))
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
-        return self.when_eat_food(food_coordinates) 
 
     def directions(self, event, delta_x, delta_y):
-        if self.controls == Control.KEYS:
+        if self.controls == Snake.Controls.KEYS:
             return self.get_directions_keys(event, delta_x, delta_y)
-        elif self.controls == Control.WASD:
+        elif self.controls == Snake.Controls.WASD:
             return self.get_directions_wasd(event, delta_x, delta_y)
    
     def get_directions_keys(self, event, delta_x, delta_y):
