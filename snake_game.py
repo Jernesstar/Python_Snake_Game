@@ -1,7 +1,7 @@
 import time
 import pygame
 from pygame import (
-    QUIT, KEYDOWN, K_BACKSPACE, K_ESCAPE, K_SPACE, K_RETURN,
+    QUIT, KEYDOWN, K_BACKSPACE, K_ESCAPE, K_SPACE, K_RETURN, K_DELETE,
     K_UP, K_DOWN, K_LEFT, K_RIGHT
 )
 
@@ -84,12 +84,17 @@ class SnakeGame:
 
     def prompt_name_screen(self, message):
         name = ""
+        plead_1 = "Please enter a valid name"
+        plead_2 = "Name must be less than 26 characters long"
         text = self.message_font.render(message, True, self.white)
         name_text = self.option_font.render(name, True, self.white)
-        x = self.width // 2 - 250
+
+        x = self.width // 2
         y = self.height // 2
 
-        rect = pygame.rect.Rect((x, y - 20), (500, 50))
+        show_warn_valid = False
+
+        rect = pygame.rect.Rect((x - 250, y - 20), (500, 50))
 
         while True:
             for event in pygame.event.get():
@@ -98,18 +103,24 @@ class SnakeGame:
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         self.end()
-                    elif event.key == K_RETURN:
-                        return name
-                    elif event.key == K_BACKSPACE and len(name) > 0:
+                    elif event.key == K_BACKSPACE and len(name) >= 0:
                         name = name[:-1]
-                        continue
-                    name += event.unicode
+                    elif event.key == K_DELETE:
+                        name = ""
+                    elif event.key == K_RETURN:
+                        if str.isspace(name) or name == "":
+                            show_warn_valid = True
+                        else: 
+                            return name
+                    elif 26 > len(name) >= 0:
+                        name += event.unicode
             name_text = self.option_font.render(name, True, self.white)
             self.game_display.blit(self.background, [0, 0])
-    
-            self.game_display.blit(text, [x, y - 120])
-            offset = self.option_font.size(name)[0] // 2
 
+            offset_x = self.message_font.size(message)[0] // 2
+            self.game_display.blit(text, [x - offset_x, y - 120])
+
+            offset = self.option_font.size(name)[0] // 2
             self.game_display.blit(
                 name_text, 
                 [(rect.center[0] - offset), rect.topleft[1] + 13] 
@@ -120,8 +131,14 @@ class SnakeGame:
             )
             if time.time() % 1 > 0.5:
                 pygame.draw.rect(self.game_display, self.white, cursor)
+            
+            if show_warn_valid:
+                warning = self.option_font.render(plead_1, True, self.white)
+                offset = self.option_font.size(plead_1)[0] // 2
+                self.game_display.blit(warning, [x - offset, rect.bottom + 50])
 
             pygame.display.update()
+
 
     def menu_screen(self, last_selected: Game_Mode, options_1, options_2):
         x_1 = self.width // 2 - 220
