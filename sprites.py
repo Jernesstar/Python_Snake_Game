@@ -9,12 +9,15 @@ from pygame import (
 
 class Apple(pygame.sprite.Sprite):
 
-    def __init__(self, size) -> None:
-        pygame.sprite.Sprite.__init__(self)
+    containers: tuple
+
+    def __init__(self, size, position: tuple[int, int]):
+        pygame.sprite.Sprite.__init__(self, self.containers)
         image = pygame.image.load("resources\\apple.gif").convert()
         self.image = pygame.transform.scale(image, (size, size))
-
-
+        self.rect = self.image.get_rect()
+        self.rect.topleft = position
+    
 class Snake:
 
     class Controls(Enum):

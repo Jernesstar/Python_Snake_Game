@@ -28,6 +28,9 @@ class Game_Mode:
     message_font = pygame.font.Font("resources\\pixel_font.ttf", 25)
     score_font = pygame.font.Font("resources\\pixel_font.ttf", 20)
 
+    apples = pygame.sprite.Group()
+    Apple.containers = apples 
+
     def __init__(self, game):
         self.snake_1 = game.snake_1
         self.clock = game.clock
@@ -46,12 +49,13 @@ class Game_Mode:
         pygame.quit()
         quit()
 
-    def get_fruit_positions(self, number: int):
-        old_x = self.snake_1.head_x
-        old_y = self.snake_1.head_y
+    def get_fruit(self, number: int):
+        old = (self.snake_1.head_x, self.snake_1.head_y)
+        size = self.snake_1.size
         if number == 1:
-            return self.rand_x_y(old_x, old_y)
-        return [self.rand_x_y(old_x, old_y) for _ in range(number)]
+            Apple(size, self.rand_x_y(*old))
+        else:
+            [Apple(size, self.rand_x_y(*old)) for _ in range(number)]
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
@@ -81,14 +85,11 @@ class Game_Mode:
                 [x, y, self.snake_1.size, self.snake_1.size]
             )
 
-    def draw_fruit(self, coordinates):
-        apple = Apple(self.snake_1.size)
-        image = apple.image
-        if isinstance(coordinates, tuple):
-            self.game_display.blit(image, coordinates)
-        elif isinstance(coordinates, list):
-            for x_y in coordinates:
-                self.game_display.blit(image, x_y)
+    def draw_fruit(self):
+        self.apples.clear(self.game_display, self.game_display)
+        dirty = self.apples.draw(self.game_display) # Return what pixels
+        # Have changed
+        pygame.display.update(dirty)
 
     def pause_screen(self):
         message = "Paused. Press return key to continue"
@@ -186,8 +187,9 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
         game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
+
         try:
-            food_x_y = self.get_fruit_positions(options["fruit_count"])
+            self.get_fruit(options["fruit_count"])
             speed = options["speed"]
         except:
             food_x_y = self.rand_x_y(0, 0)
@@ -215,25 +217,25 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
             self.snake_1.move(delta_x, delta_y)
             game_over = self.snake_1.check_for_game_over(game_over)
-            food_eaten = self.snake_1.check_for_food_eaten(food_x_y)
+            #ood_eaten = self.snake_1.check_for_food_eaten(food_x_y)
             
-            if isinstance(food_x_y, tuple):
-                if food_eaten:
-                    food_x_y = self.rand_x_y(*food_x_y)
-            elif isinstance(food_x_y, list):
-                if food_eaten != -1:
-                    x_y = food_x_y.pop(food_eaten)
-                    food_x_y.append(self.rand_x_y(*x_y))
+            # if isinstance(food_x_y, tuple):
+            #     if food_eaten:
+            #         food_x_y = self.rand_x_y(*food_x_y)
+            # elif isinstance(food_x_y, list):
+            #     if food_eaten != -1:
+            #         x_y = food_x_y.pop(food_eaten)
+            #         food_x_y.append(self.rand_x_y(*x_y))
 
             self.tile_background()
-
-            self.draw_fruit(food_x_y)
+            self.draw_fruit()
             self.draw_snake()
             self.show_scores()
 
             self.clock.tick(speed)
             self.update()
-            
+        
+        self.apples.empty()
         return self.game_over_screen()
 
 
@@ -328,7 +330,7 @@ class TwoPlayer_Snake(Game_Mode):
 
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
-            food_x_y = self.get_fruit_positions(options["fruit_count"])
+            food_x_y = self.get_fruit(options["fruit_count"])
             speed = options["speed"]
         except:
             food_x_y = self.rand_x_y(0, 0)
