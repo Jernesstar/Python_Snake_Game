@@ -8,11 +8,11 @@ from pygame import (
     K_w, K_s, K_a, K_d
 )
 
-from snake import Snake
+from sprites import Snake, Apple
 
 pygame.init()
 
-class Game_Mode():
+class Game_Mode:
 
     snake_1: Snake
     clock: pygame.time.Clock
@@ -82,20 +82,13 @@ class Game_Mode():
             )
 
     def draw_fruit(self, coordinates):
+        apple = Apple(self.snake_1.size)
+        image = apple.image
         if isinstance(coordinates, tuple):
-            (x, y) = coordinates
-            pygame.draw.rect(
-                self.game_display, 
-                self.orange, 
-                [x, y, self.snake_1.size, self.snake_1.size]
-            )
+            self.game_display.blit(image, coordinates)
         elif isinstance(coordinates, list):
-            for x, y in coordinates:
-                pygame.draw.rect(
-                    self.game_display, 
-                    self.orange, 
-                    [x, y, self.snake_1.size, self.snake_1.size]
-                )
+            for x_y in coordinates:
+                self.game_display.blit(image, x_y)
 
     def pause_screen(self):
         message = "Paused. Press return key to continue"
@@ -219,13 +212,15 @@ class OnePlayer_Classic_Snake(Game_Mode):
             if see_menu:
                 return (False, True)
             paused = False
-            food_eaten = self.snake_1.move(delta_x, delta_y, food_x_y)
+
+            self.snake_1.move(delta_x, delta_y)
             game_over = self.snake_1.check_for_game_over(game_over)
+            food_eaten = self.snake_1.check_for_food_eaten(food_x_y)
             
-            if isinstance(food_eaten, bool):
+            if isinstance(food_x_y, tuple):
                 if food_eaten:
                     food_x_y = self.rand_x_y(*food_x_y)
-            elif isinstance(food_eaten, int):
+            elif isinstance(food_x_y, list):
                 if food_eaten != -1:
                     x_y = food_x_y.pop(food_eaten)
                     food_x_y.append(self.rand_x_y(*x_y))
@@ -309,8 +304,7 @@ class TwoPlayer_Snake(Game_Mode):
                     if event.key == K_RETURN:
                         return (False, False)
                     if event.key == K_SPACE:
-                        return (False, True)
-                        
+                        return (False, True)            
             self.tile_background()
 
             self.game_display.blit(
@@ -358,22 +352,26 @@ class TwoPlayer_Snake(Game_Mode):
             if see_menu:
                 return (False, True)
             paused = False
-            i = self.snake_1.move(delta_x_1, delta_y_1, food_x_y)
-            j = self.snake_2.move(delta_x_2, delta_y_2, food_x_y)
+            self.snake_1.move(delta_x_1, delta_y_1)
+            self.snake_2.move(delta_x_2, delta_y_2)
 
             game_over_1 = self.snake_1.check_for_game_over(game_over_1)
             game_over_2 = self.snake_2.check_for_game_over(game_over_2)
 
-            if isinstance(i, bool):
+            i = self.snake_1.check_for_food_eaten(food_x_y)
+            j = self.snake_2.check_for_food_eaten(food_x_y)
+
+            if isinstance(food_x_y, tuple):
                 if i or j:
                     food_x_y = self.rand_x_y(*food_x_y)     
-            elif isinstance(i, int):
+            elif isinstance(food_x_y, list):
                 if i != -1:
                     x_y = food_x_y.pop(i)
                     food_x_y.append(self.rand_x_y(*x_y))
                 if j != -1:
                     x_y = food_x_y.pop(j)
                     food_x_y.append(self.rand_x_y(*x_y))
+
             self.tile_background()
 
             self.draw_fruit(food_x_y)
