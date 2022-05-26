@@ -85,7 +85,6 @@ class SnakeGame:
     def prompt_name_screen(self, message):
         name = ""
         plead_1 = "Please enter a valid name"
-        plead_2 = "Name must be less than 26 characters long"
         text = self.message_font.render(message, True, self.white)
         name_text = self.option_font.render(name, True, self.white)
 
@@ -93,7 +92,6 @@ class SnakeGame:
         y = self.height // 2
 
         show_warn_valid = False
-        show_warn_length = False
 
         rect = pygame.rect.Rect((x - 250, y - 20), (500, 50))
 
