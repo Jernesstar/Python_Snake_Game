@@ -5,7 +5,7 @@ from pygame import (
     K_UP, K_DOWN, K_LEFT, K_RIGHT
 )
 
-from sprites import Snake
+from sprites import Snake, Apple
 
 from game_modes import (
     Game_Mode,
@@ -31,23 +31,23 @@ class SnakeGame:
 
     message_font = pygame.font.Font("resources\\pixel_font.ttf", 40)
     option_font = pygame.font.Font("resources\\pixel_font.ttf", 30)
+    
+    snake_1 = None
+    snake_2 = None
+    classic_snake = None
+    two_player = None
 
+    apples = pygame.sprite.Group()
+    Apple.containers = apples 
+    
     def __init__(self, size):
         self.clock = pygame.time.Clock()
-
         self.square_size = size
         self.width += self.width % size
         self.height += self.height % size
-
         self.game_display = pygame.display.set_mode((self.width, self.height))
-
         background = pygame.image.load("resources\\start_bg.png").convert()
         self.background = pygame.transform.scale(background, self.dimensions)
-
-        self.snake_1 = None
-        self.snake_2 = None
-        self.classic_snake = None
-        self.two_player = None
 
     def start_screen(self):
         main_message = "Snake 2.0"

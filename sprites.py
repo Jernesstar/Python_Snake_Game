@@ -18,16 +18,21 @@ class Apple(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = position
     
-class Snake:
+
+class Snake(pygame.sprite.Sprite):
 
     class Controls(Enum):
         KEYS = 1
         WASD = 2
 
+
     score, size, length = 0, 10, 1
     head_x, head_y = 250, 250
 
     def __init__(self, game, name: str, controls=Controls.KEYS):
+        pygame.sprite.Sprite.__init__(self)
+        pos, rect = (self.head_x, self.head_y), (self.size, self.size)
+        self.rect = pygame.rect.Rect(pos, rect)
         self.name = name.strip()
         self.display_width = game.width
         self.display_height = game.height
@@ -36,7 +41,9 @@ class Snake:
         self.pixels = []
 
     def reset(self):
-        self.pixels, self.score, self.length = [], 0, 1
+        self.pixels = []
+        self.score = 0
+        self.length = 1
 
     def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
@@ -76,6 +83,7 @@ class Snake:
     def move(self, delta_x, delta_y):
         self.head_x += delta_x
         self.head_y += delta_y
+        self.rect.topleft = (self.head_x, self.head_y)
         self.pixels.append((self.head_x, self.head_y))
         if len(self.pixels) > self.length:
             self.pixels.pop(0)

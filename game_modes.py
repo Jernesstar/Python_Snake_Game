@@ -7,6 +7,7 @@ from pygame import (
     K_UP, K_DOWN, K_LEFT, K_RIGHT, 
     K_w, K_s, K_a, K_d
 )
+from pygame import sprite
 
 from sprites import Snake, Apple
 
@@ -28,15 +29,13 @@ class Game_Mode:
     message_font = pygame.font.Font("resources\\pixel_font.ttf", 25)
     score_font = pygame.font.Font("resources\\pixel_font.ttf", 20)
 
-    apples = pygame.sprite.Group()
-    Apple.containers = apples 
-
     def __init__(self, game):
         self.snake_1 = game.snake_1
         self.clock = game.clock
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
+        self.apples: sprite.Group = game.apples
 
     def run(self, options):
         raise NotImplementedError("Child classes should implement this method")
@@ -49,13 +48,12 @@ class Game_Mode:
         pygame.quit()
         quit()
 
-    def get_fruit(self, number: int):
-        old = (self.snake_1.head_x, self.snake_1.head_y)
+    def make_fruits(self, number: int):
         size = self.snake_1.size
         if number == 1:
-            Apple(size, self.rand_x_y(*old))
+            Apple(size, self.rand_x_y())
         else:
-            [Apple(size, self.rand_x_y(*old)) for _ in range(number)]
+            [Apple(size, self.rand_x_y()) for _ in range(number)]
 
     def tile_background(self):
         colors = [self.light_green, self.dark_green]
@@ -134,17 +132,15 @@ class Game_Mode:
                 return True
         return False
         
-    def rand_x_y(self, old_x, old_y):
+    def rand_x_y(self) -> tuple[int, int]:
         size = self.snake_1.size
+        rand_x = randrange(0, self.snake_1.display_width // size) * size
+        rand_y = randrange(0, self.snake_1.display_height // size) * size
         
-        rand_x = randrange(0, (self.snake_1.display_width) // size) * size
-        rand_y = randrange(0, (self.snake_1.display_height) // size) * size
-        
-        if (rand_x, rand_y) not in self.snake_1.pixels and \
-            (rand_x, rand_y) != (old_x, old_y):
+        if (rand_x, rand_y) not in self.snake_1.pixels:
             return (rand_x, rand_y)
         else:
-            return self.rand_x_y(old_x, old_y)
+            return self.rand_x_y()
 
 
 class OnePlayer_Classic_Snake(Game_Mode):
@@ -183,16 +179,18 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.update()
 
     def run(self, options):
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
+        (head_x, head_y) = self.rand_x_y()
+        (self.snake_1.head_x, self.snake_1.head_y) = (head_x, head_y)
+        self.snake_1.pixels.append((head_x, head_y))
 
         game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
 
         try:
-            self.get_fruit(options["fruit_count"])
+            self.make_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
-            food_x_y = self.rand_x_y(0, 0)
+            Apple(self.snake_1.size, self.rand_x_y())
             speed = 10
 
         while game_over == False:
@@ -204,11 +202,13 @@ class OnePlayer_Classic_Snake(Game_Mode):
                         return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
-                    # Since only one snake, allow for KEYS or WASD    
+                    if delta_x == 0 or delta_y == 0:
+                        self.snake_1.length = 3
+                    # Since only one snake, allow for KEYS or WASD  
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
-                        event, delta_x, delta_y)  
+                        event, delta_x, delta_y)
             if paused:
                 see_menu = self.pause_screen()
             if see_menu:
@@ -217,15 +217,12 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
             self.snake_1.move(delta_x, delta_y)
             game_over = self.snake_1.check_for_game_over(game_over)
-            #ood_eaten = self.snake_1.check_for_food_eaten(food_x_y)
             
-            # if isinstance(food_x_y, tuple):
-            #     if food_eaten:
-            #         food_x_y = self.rand_x_y(*food_x_y)
-            # elif isinstance(food_x_y, list):
-            #     if food_eaten != -1:
-            #         x_y = food_x_y.pop(food_eaten)
-            #         food_x_y.append(self.rand_x_y(*x_y))
+            # Check if the snake has eaten an apple
+            for _ in sprite.spritecollide(self.snake_1, self.apples, 1):
+                Apple(self.snake_1.size, self.rand_x_y())
+                self.snake_1.score += 1
+                self.snake_1.length += 1
 
             self.tile_background()
             self.draw_fruit()
@@ -251,13 +248,15 @@ class TwoPlayer_Snake(Game_Mode):
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
+        self.apples: sprite.Group = game.apples
 
-    def rand_x_y(self, old_x, old_y):
-        (rand_x, rand_y) = super().rand_x_y(old_x, old_y)
+
+    def rand_x_y(self):
+        (rand_x, rand_y) = super().rand_x_y()
         if (rand_x, rand_y) not in self.snake_2.pixels:
             return (rand_x, rand_y)
         else:
-            return self.rand_x_y(old_x, old_y)
+            return self.rand_x_y()
 
     def draw_snake(self):
         for x, y, in self.snake_1.pixels:
@@ -322,18 +321,18 @@ class TwoPlayer_Snake(Game_Mode):
             self.update()
         
     def run(self, options):        
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y(250, 250)
-        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y(250, 250)
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
+        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
      
         delta_x_1, delta_y_1 = 0, 0
         delta_x_2, delta_y_2 = 0, 0
 
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
-            food_x_y = self.get_fruit(options["fruit_count"])
+            food_x_y = self.make_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
-            food_x_y = self.rand_x_y(0, 0)
+            food_x_y = self.rand_x_y()
             speed = 10
 
         while (game_over_1, game_over_2) == (False, False):
@@ -365,14 +364,14 @@ class TwoPlayer_Snake(Game_Mode):
 
             if isinstance(food_x_y, tuple):
                 if i or j:
-                    food_x_y = self.rand_x_y(*food_x_y)     
+                    food_x_y = self.rand_x_y()     
             elif isinstance(food_x_y, list):
                 if i != -1:
-                    x_y = food_x_y.pop(i)
-                    food_x_y.append(self.rand_x_y(*x_y))
+                    food_x_y.pop(i)
+                    food_x_y.append(self.rand_x_y())
                 if j != -1:
-                    x_y = food_x_y.pop(j)
-                    food_x_y.append(self.rand_x_y(*x_y))
+                    food_x_y.pop(j)
+                    food_x_y.append(self.rand_x_y())
 
             self.tile_background()
 
