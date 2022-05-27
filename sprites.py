@@ -19,6 +19,14 @@ class Apple(pygame.sprite.Sprite):
         self.rect.topleft = position
     
 
+class Block(pygame.sprite.Sprite):
+    
+    containers: pygame.sprite.Group
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self, self.containers)
+        
+
 class Snake(pygame.sprite.Sprite):
 
     class Controls(Enum):
