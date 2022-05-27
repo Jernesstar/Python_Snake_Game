@@ -51,8 +51,10 @@ class SnakeGame:
 
     def start_screen(self):
         main_message = "Snake 2.0"
-        messages = ["Press any key to continue_", "Press any key to continue"]
+        messages = ["Press any key to continue", "Press any key to continue_"]
         colors = [self.black, self.white]
+        x = self.width // 2
+        y = self.height // 2
         
         while True:
             for event in pygame.event.get():
@@ -65,18 +67,13 @@ class SnakeGame:
                         return
             text = self.message_font.render(main_message, True, colors[0])
             text_2 = self.message_font.render(messages[0], True, self.white)
-        
+            offset_1 = self.message_font.size(main_message)[0] // 2
+            offset_2 = self.message_font.size(messages[0])[0] // 2
+
             self.game_display.blit(self.background, [0, 0])
-            self.game_display.blit(
-                text, 
-                [(self.width // 2) - 120, 
-                (self.height // 2) - self.message_font.get_height()]
-            )
-            self.game_display.blit(
-                text_2, 
-                [(self.width // 2) - 250, 
-                (self.height // 2)]
-            )
+
+            self.game_display.blit(text, [x - offset_1, y - 40])
+            self.game_display.blit(text_2, [x - offset_2, y])
             self.clock.tick(2)
             colors.reverse()
             messages.reverse()
@@ -206,7 +203,7 @@ class SnakeGame:
 
             pygame.draw.rect(self.game_display, colors[0], square, 3)
             pygame.draw.rect(self.game_display, colors[1], square_2, 3)
-
+            
             self.game_display.blit(
                 text, [self.width // 2 - 250, self.height // 2 - 90]
             )

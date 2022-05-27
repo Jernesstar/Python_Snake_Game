@@ -142,6 +142,13 @@ class Game_Mode:
         else:
             return self.rand_x_y()
 
+    def check_for_collisions(self):
+        # Check if the snake has eaten an apple
+        for _ in sprite.spritecollide(self.snake_1, self.apples, 1):
+            Apple(self.snake_1.size, self.rand_x_y())
+            self.snake_1.score += 1
+            self.snake_1.length += 1
+
 
 class OnePlayer_Classic_Snake(Game_Mode):
 
@@ -217,12 +224,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
 
             self.snake_1.move(delta_x, delta_y)
             game_over = self.snake_1.check_for_game_over(game_over)
-            
-            # Check if the snake has eaten an apple
-            for _ in sprite.spritecollide(self.snake_1, self.apples, 1):
-                Apple(self.snake_1.size, self.rand_x_y())
-                self.snake_1.score += 1
-                self.snake_1.length += 1
+            self.check_for_collisions()
 
             self.tile_background()
             self.draw_fruit()
@@ -242,14 +244,9 @@ class TwoPlayer_Snake(Game_Mode):
     snake_2: Snake
 
     def __init__(self, game):
-        self.snake_1 = game.snake_1
+        super().__init__(game)
         self.snake_2 = game.snake_2
-        self.clock = game.clock
-        self.game_display = game.game_display
-        self.display_width = game.width
-        self.display_height = game.height
         self.apples: sprite.Group = game.apples
-
 
     def rand_x_y(self):
         (rand_x, rand_y) = super().rand_x_y()
@@ -259,30 +256,28 @@ class TwoPlayer_Snake(Game_Mode):
             return self.rand_x_y()
 
     def draw_snake(self):
-        for x, y, in self.snake_1.pixels:
-            pygame.draw.rect(
-                self.game_display, 
-                self.black, 
-                [x, y, self.snake_1.size, self.snake_1.size]
-            )
+        super().draw_snake()
         for x, y, in self.snake_2.pixels:
             pygame.draw.rect(
                 self.game_display, 
-                self.red, 
+                self.red,
                 [x, y, self.snake_2.size, self.snake_2.size]
             )
 
     def show_scores(self):
-        text_1 = self.score_font.render(
-            f"{self.snake_1.name}'s score: {self.snake_1.score}",
-            True, self.black
-        )
+        super().show_scores()
         text_2 = self.score_font.render(
             f"{self.snake_2.name}'s score: {self.snake_2.score}",
             True, self.red
         )
-        self.game_display.blit(text_1, [3, 0])
         self.game_display.blit(text_2, [3, self.score_font.get_height()])
+
+    def check_for_collisions(self):
+        super().check_for_collisions()
+        for _ in sprite.spritecollide(self.snake_2, self.apples, 1):
+            Apple(self.snake_1.size, self.rand_x_y())
+            self.snake_1.score += 1
+            self.snake_1.length += 1
     
     def winner_screen(self, snake_1_game_over: bool):
         (winner_name, winner_score) = (
@@ -323,10 +318,8 @@ class TwoPlayer_Snake(Game_Mode):
     def run(self, options):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
-     
-        delta_x_1, delta_y_1 = 0, 0
-        delta_x_2, delta_y_2 = 0, 0
 
+        delta_x_1, delta_y_1, delta_x_2, delta_y_2 = 0, 0, 0, 0
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
             food_x_y = self.make_fruits(options["fruit_count"])
@@ -334,7 +327,6 @@ class TwoPlayer_Snake(Game_Mode):
         except:
             food_x_y = self.rand_x_y()
             speed = 10
-
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -350,36 +342,22 @@ class TwoPlayer_Snake(Game_Mode):
                         event, delta_x_2, delta_y_2)
             if paused:
                 see_menu = self.pause_screen()
+            paused = False
             if see_menu:
                 return (False, True)
-            paused = False
             self.snake_1.move(delta_x_1, delta_y_1)
             self.snake_2.move(delta_x_2, delta_y_2)
 
             game_over_1 = self.snake_1.check_for_game_over(game_over_1)
             game_over_2 = self.snake_2.check_for_game_over(game_over_2)
-
-            i = self.snake_1.check_for_food_eaten(food_x_y)
-            j = self.snake_2.check_for_food_eaten(food_x_y)
-
-            if isinstance(food_x_y, tuple):
-                if i or j:
-                    food_x_y = self.rand_x_y()     
-            elif isinstance(food_x_y, list):
-                if i != -1:
-                    food_x_y.pop(i)
-                    food_x_y.append(self.rand_x_y())
-                if j != -1:
-                    food_x_y.pop(j)
-                    food_x_y.append(self.rand_x_y())
+            self.check_for_collisions()
 
             self.tile_background()
-
-            self.draw_fruit(food_x_y)
+            self.draw_fruit()
             self.draw_snake()
             self.show_scores()
 
             self.clock.tick(speed)
             self.update()
-            
+
         return self.winner_screen(snake_1_game_over=game_over_1)

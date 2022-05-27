@@ -9,7 +9,7 @@ from pygame import (
 
 class Apple(pygame.sprite.Sprite):
 
-    containers: tuple
+    containers: pygame.sprite.Group
 
     def __init__(self, size, position: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self, self.containers)
@@ -64,21 +64,6 @@ class Snake(pygame.sprite.Sprite):
         elif self.head_y <= -self.size:
             return True
         return False
-
-    def check_for_food_eaten(self, food_coordinates):
-        if isinstance(food_coordinates, tuple):
-            if (self.head_x, self.head_y) == food_coordinates:
-                self.score += 1
-                self.length += 1
-                return True
-            return False
-        elif isinstance(food_coordinates, list):
-            for i, food_x_y in enumerate(food_coordinates):
-                if (self.head_x, self.head_y) == food_x_y:
-                    self.score += 1
-                    self.length += 1
-                    return i
-            return -1
             
     def move(self, delta_x, delta_y):
         self.head_x += delta_x
