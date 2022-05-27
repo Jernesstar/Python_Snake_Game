@@ -55,6 +55,8 @@ class SnakeGame:
         colors = [self.black, self.white]
         x = self.width / 2
         y = self.height / 2
+        offset_1 = self.message_font.size(main_message)[0] / 2
+        offset_2 = self.message_font.size(messages[0])[0] / 2
         
         while True:
             for event in pygame.event.get():
@@ -67,11 +69,8 @@ class SnakeGame:
                         return
             text = self.message_font.render(main_message, True, colors[0])
             text_2 = self.message_font.render(messages[0], True, self.white)
-            offset_1 = self.message_font.size(main_message)[0] / 2
-            offset_2 = self.message_font.size(messages[0])[0] / 2
 
             self.game_display.blit(self.background, [0, 0])
-
             self.game_display.blit(text, [x - offset_1, y - 40])
             self.game_display.blit(text_2, [x - offset_2, y])
             self.clock.tick(2)
@@ -139,7 +138,6 @@ class SnakeGame:
         y = self.height // 2
         x_2 = self.width // 2 + 30
         message = "Choose a game mode to play" 
-        text = self.message_font.render(message, True, self.white)
         colors = [self.white, self.black]
         color_1, color_2 = self.grey, self.black
 
@@ -196,6 +194,7 @@ class SnakeGame:
                         if colors[1] == self.white and color_2 == self.grey:
                             return (self.two_player, options_2)
 
+            text = self.message_font.render(message, True, self.white)
             text_1 = self.option_font.render("One Player", True, colors[0])
             text_2 = self.option_font.render("Two Player", True, colors[1])
             option_text_1 = self.option_font.render("Options", True, color_1)
