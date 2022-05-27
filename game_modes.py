@@ -166,20 +166,15 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.update()
 
     def run(self, options):
-        (head_x, head_y) = self.rand_x_y()
-        (self.snake_1.head_x, self.snake_1.head_y) = (head_x, head_y)
-        self.snake_1.pixels.append((head_x, head_y))
-
+        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
         game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
-
         try:
             self.make_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
             Apple(self.snake_1.size, self.rand_x_y())
             speed = 10
-
         while game_over == False:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -189,8 +184,6 @@ class OnePlayer_Classic_Snake(Game_Mode):
                         return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
-                    if delta_x == 0 or delta_y == 0:
-                        self.snake_1.length = 3
                     # Since only one snake, allow for KEYS or WASD  
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
@@ -283,7 +276,6 @@ class TwoPlayer_Snake(Game_Mode):
                         return (False, False)
                     if event.key == K_SPACE:
                         return (False, True)
-
             self.game_display.blit(self.tiled_background, [0, 0])
             self.game_display.blit(text, [x - 120, y - 40])
             self.game_display.blit(text_2, [x - 155, y])
@@ -292,7 +284,7 @@ class TwoPlayer_Snake(Game_Mode):
     def run(self, options):        
         (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
         (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
-
+        
         delta_x_1, delta_y_1, delta_x_2, delta_y_2 = 0, 0, 0, 0
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:

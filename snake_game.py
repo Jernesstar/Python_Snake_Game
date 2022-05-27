@@ -140,6 +140,7 @@ class SnakeGame:
         message = "Choose a game mode to play" 
         colors = [self.white, self.black]
         color_1, color_2 = self.grey, self.black
+        text = self.message_font.render(message, True, self.white)
 
         square = pygame.rect.Rect(x_1, y, 170, 50)
         square_2 = pygame.rect.Rect(x_2, y, 170, 50)
@@ -161,15 +162,15 @@ class SnakeGame:
                         self.end()
                     if event.key in (K_LEFT, K_RIGHT):
                         if colors[0] in (self.grey, self.white):
-                            colors[0] = self.black 
+                            colors[0] = self.black  
                             colors[1] = self.white
                             color_1 = self.black
                             color_2 = self.grey
-                        if colors[1] in (self.grey, self.white):
+                        elif colors[1] in (self.grey, self.white):
                             colors[0] = self.white 
                             colors[1] = self.black
-                            color_1 = self.black
-                            color_2 = self.grey
+                            color_1 = self.grey
+                            color_2 = self.black
                     if event.key == K_UP:
                         if colors[0] == self.grey:
                             color_1 = self.grey
@@ -194,7 +195,6 @@ class SnakeGame:
                         if colors[1] == self.white and color_2 == self.grey:
                             return (self.two_player, options_2)
 
-            text = self.message_font.render(message, True, self.white)
             text_1 = self.option_font.render("One Player", True, colors[0])
             text_2 = self.option_font.render("Two Player", True, colors[1])
             option_text_1 = self.option_font.render("Options", True, color_1)
