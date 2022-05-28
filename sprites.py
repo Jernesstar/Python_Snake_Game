@@ -25,6 +25,17 @@ class Block(pygame.sprite.Sprite):
     
     containers: pygame.sprite.RenderUpdates()
     images = []
+    size = 50
+    movement_to_image = {
+        # snake going up from left
+        ((-size, 0), (0, -size)): images[3],
+        # snake going up from right
+        ((size, 0), (0, -size)): images[4],
+        # snake going down from left
+        ((-size, 0), (0, size)): pygame.transform.rotate(images[3], -90),
+        # snake going down from right
+        ((size, 0), (0, size)): pygame.transform.rotate(images[4], 90)
+    }
 
     def __init__(self, size, pos: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self)
@@ -39,7 +50,7 @@ class Block(pygame.sprite.Sprite):
         self.images = [
             pygame.transform.scale(im, (size, size)) for im in self.images
         ]
-        self.image = self.images[3]
+        self.image = self.images[2]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
     
@@ -50,7 +61,7 @@ class Snake(pygame.sprite.Sprite):
         KEYS = 1
         WASD = 2
 
-    score, size, length = 0, 10, 1
+    score, size, length = 0, 10, 3
     head_x, head_y = 250, 250
 
     def __init__(self, game, name: str, controls=Controls.KEYS):
@@ -63,12 +74,11 @@ class Snake(pygame.sprite.Sprite):
         self.controls = controls
         self.size = game.square_size
         self.pixels = []
-        self.block = Block(50, (44, 44))
 
     def reset(self):
         self.pixels = []
         self.score = 0
-        self.length = 1
+        self.length = 3
 
     def update(self):
         pass
