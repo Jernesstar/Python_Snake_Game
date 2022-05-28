@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 
 import pygame
 from pygame import (
@@ -21,12 +22,17 @@ class Apple(pygame.sprite.Sprite):
 
 class Block(pygame.sprite.Sprite):
     
-    containers: pygame.sprite.Group
+    containers: pygame.sprite.RenderUpdates()
+    images = []
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.containers)
+        resources_path = os.path.split(__file__)[0] / "resources"
+        for file in os.listdir(resources_path):
+            if file.startswith("block"):
+                self.images.append(pygame.image.load(file).convert())
+    
         
-
 class Snake(pygame.sprite.Sprite):
 
     class Controls(Enum):
