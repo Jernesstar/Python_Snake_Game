@@ -25,18 +25,22 @@ class Block(pygame.sprite.Sprite):
     containers: pygame.sprite.RenderUpdates()
     images = []
 
-    def __init__(self, size):
+    def __init__(self, size, pos: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self, self.containers)
         resources_path = os.path.split(__file__)[0] / "resources"
-        images = [
+        self.images = [
             pygame.image.load(resources_path / "block_left_up.png").convert(),
             pygame.image.load(resources_path / "block_right_up.png").convert(),
             pygame.image.load(resources_path / "block_straight.png").convert(),
             pygame.image.load(resources_path / "block_up_left.png").convert(),
             pygame.image.load(resources_path / "block_up_right.png").convert()
         ]
-        images = [pygame.transform.scale(im, (size, size)) for im in images]
+        self.images = [
+            pygame.transform.scale(im, (size, size)) for im in self.images
+        ]
         self.image = self.images[2]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
     
         
 class Snake(pygame.sprite.Sprite):
@@ -57,12 +61,15 @@ class Snake(pygame.sprite.Sprite):
         self.display_height = game.height
         self.controls = controls
         self.size = game.square_size
-        self.pixels: list[Block] = []
+        self.pixels = []
 
     def reset(self):
         self.pixels = []
         self.score = 0
         self.length = 1
+
+    def update(self):
+        pass
 
     def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
