@@ -48,6 +48,10 @@ class SnakeGame:
         self.game_display = pygame.display.set_mode((self.width, self.height))
         background = pygame.image.load("resources\\start_bg.png").convert()
         self.background = pygame.transform.scale(background, self.dimensions)
+        self.snake_1 = Snake(self, "", Snake.Controls.KEYS)
+        self.snake_2 = Snake(self, "", Snake.Controls.WASD)
+        self.classic_snake = OnePlayer_Classic_Snake(game=self)
+        self.two_player = TwoPlayer_Snake(game=self)
 
     def start_screen(self):
         main_message = "Snake 2.0"
@@ -298,6 +302,7 @@ class SnakeGame:
     def play(self):
         see_menu, stop = True, False
         name_1, name_2 = "", ""
+        game_mode = self.classic_snake
         options_1 = {
             "fruit_count": 1,
             "speed": 10
@@ -306,28 +311,21 @@ class SnakeGame:
             "fruit_count": 1,
             "speed": 10
         }
-        self.start_screen()
 
+        self.start_screen()
         name_1 = self.prompt_name_screen("Enter your player name")
-        self.snake_1 = Snake(self, name_1, Snake.Controls.KEYS)
-        self.classic_snake = OnePlayer_Classic_Snake(game=self)
-        
-        game_mode = self.classic_snake
+        self.snake_1.name = name_1
 
         while stop == False:
             if see_menu:
                 (game_mode, options) = self.menu_screen(
                     game_mode, options_1, options_2)
-            if game_mode == None:
+            if game_mode == self.two_player and self.snake_2.name == "":
                 while name_2 == name_1 or name_2 == "":
                     name_2 = self.prompt_name_screen("Enter player 2 name")
-                self.snake_2 = Snake(self, name_2, Snake.Controls.WASD)
-                self.two_player = TwoPlayer_Snake(game=self)
-                game_mode = self.two_player
-
+                self.snake_2.name = name_2
             self.snake_1.reset()
-            if self.snake_2:
-                self.snake_2.reset()
+            self.snake_2.reset()
             (stop, see_menu) = game_mode.run(options=options)
 
         self.end()
