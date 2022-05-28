@@ -39,7 +39,7 @@ class Block(pygame.sprite.Sprite):
         self.images = [
             pygame.transform.scale(im, (size, size)) for im in self.images
         ]
-        self.image = self.images[2]
+        self.image = self.images[3]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
     

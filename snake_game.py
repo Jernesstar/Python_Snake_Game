@@ -284,6 +284,8 @@ class SnakeGame:
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(option_text, [x - 80, 60])
 
+            self.game_display.blit(self.snake_1.block.image, [200, 200])
+            
             self.game_display.blit(text, [x - 310, 100])
             self.game_display.blit(text_2, [x - 220, 140])
 
