@@ -127,8 +127,8 @@ class SnakeGame:
             
             if show_warn_valid:
                 warning = self.option_font.render(plead, True, self.white)
-                offset_1 = self.option_font.size(plead)[0] / 2
-                self.game_display.blit(warning, [x - offset_1, rect.bottom + 50])
+                offset = self.option_font.size(plead)[0] / 2
+                self.game_display.blit(warning, [x - offset, rect.bottom + 50])
 
             pygame.display.update()
 

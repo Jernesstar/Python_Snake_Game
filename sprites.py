@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+from pathlib import Path
 
 import pygame
 from pygame import (
@@ -26,14 +27,14 @@ class Block(pygame.sprite.Sprite):
     images = []
 
     def __init__(self, size, pos: tuple[int, int]):
-        pygame.sprite.Sprite.__init__(self, self.containers)
-        resources_path = os.path.split(__file__)[0] / "resources"
+        pygame.sprite.Sprite.__init__(self)
+        path = Path(os.path.split(__file__)[0]) / "resources"
         self.images = [
-            pygame.image.load(resources_path / "block_left_up.png").convert(),
-            pygame.image.load(resources_path / "block_right_up.png").convert(),
-            pygame.image.load(resources_path / "block_straight.png").convert(),
-            pygame.image.load(resources_path / "block_up_left.png").convert(),
-            pygame.image.load(resources_path / "block_up_right.png").convert()
+            pygame.image.load(path / "block_left_up.png").convert(),
+            pygame.image.load(path / "block_right_up.png").convert(),
+            pygame.image.load(path / "block_straight.png").convert(),
+            pygame.image.load(path / "block_up_left.png").convert(),
+            pygame.image.load(path / "block_up_right.png").convert()
         ]
         self.images = [
             pygame.transform.scale(im, (size, size)) for im in self.images
@@ -62,6 +63,7 @@ class Snake(pygame.sprite.Sprite):
         self.controls = controls
         self.size = game.square_size
         self.pixels = []
+        self.block = Block(50, (44, 44))
 
     def reset(self):
         self.pixels = []
