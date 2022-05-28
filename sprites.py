@@ -25,12 +25,18 @@ class Block(pygame.sprite.Sprite):
     containers: pygame.sprite.RenderUpdates()
     images = []
 
-    def __init__(self):
+    def __init__(self, size):
         pygame.sprite.Sprite.__init__(self, self.containers)
         resources_path = os.path.split(__file__)[0] / "resources"
-        for file in os.listdir(resources_path):
-            if file.startswith("block"):
-                self.images.append(pygame.image.load(file).convert())
+        images = [
+            pygame.image.load(resources_path / "block_left_up.png").convert(),
+            pygame.image.load(resources_path / "block_right_up.png").convert(),
+            pygame.image.load(resources_path / "block_straight.png").convert(),
+            pygame.image.load(resources_path / "block_up_left.png").convert(),
+            pygame.image.load(resources_path / "block_up_right.png").convert()
+        ]
+        images = [pygame.transform.scale(im, (size, size)) for im in images]
+        self.image = self.images[2]
     
         
 class Snake(pygame.sprite.Sprite):
@@ -38,7 +44,6 @@ class Snake(pygame.sprite.Sprite):
     class Controls(Enum):
         KEYS = 1
         WASD = 2
-
 
     score, size, length = 0, 10, 1
     head_x, head_y = 250, 250
@@ -52,7 +57,7 @@ class Snake(pygame.sprite.Sprite):
         self.display_height = game.height
         self.controls = controls
         self.size = game.square_size
-        self.pixels = []
+        self.pixels: list[Block] = []
 
     def reset(self):
         self.pixels = []
