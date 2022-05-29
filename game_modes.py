@@ -80,7 +80,7 @@ class Game_Mode:
             self.game_display.blit(block.image, block.rect)
 
     def draw_fruit(self):
-        self.apples.clear(self.game_display, self.game_display)
+        self.apples.clear(self.game_display, self.tiled_background)
         # Returns what pixels have changed
         dirty = self.apples.draw(self.game_display) 
         pygame.display.update(dirty)
@@ -169,9 +169,10 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.display_width / 2 - 5 * self.size, 
             self.display_height / 2
         )
-        for i in range(1, 3 + 1):
-            x = self.snake_1.head_x - i * self.size
-            block = Block(self.size, (x, self.display_height / 2))
+        self.snake_1.length = 3
+        for i in range(3):
+            x = self.snake_1.head_x - (i * self.size)
+            block = Block(self.size, (x, self.snake_1.head_y))
             self.snake_1.pixels.append(block)
 
         game_over, paused, see_menu = False, False, False 
@@ -298,12 +299,14 @@ class TwoPlayer_Snake(Game_Mode):
             self.display_width / 2 + 4 * self.snake_2.size, 
             self.display_height / 2
         )
-        for i in range(1, 3 + 1):
-            x = self.snake_1.head_x - i * self.size
+        self.snake_1.length = 3
+        self.snake_2.length = 3
+        for i in range(3):
+            x = self.snake_1.head_x - (i * self.size)
             block = Block(self.size, (x, self.display_height / 2))
             self.snake_1.pixels.append(block)
-        for i in range(1, 3 + 1):
-            x = self.snake_2.head_x + i * self.size
+        for i in range(3):
+            x = self.snake_2.head_x + (i * self.size)
             block = Block(self.size, (x, self.display_height / 2))
             self.snake_2.pixels.append(block)
 

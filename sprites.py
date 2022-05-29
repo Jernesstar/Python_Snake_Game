@@ -31,7 +31,6 @@ class Apple(pygame.sprite.Sprite):
 
 class Block(pygame.sprite.Sprite):
     
-    containers: pygame.sprite.RenderUpdates()
     images = []
     size = 50
     movement_to_image: dict
@@ -61,7 +60,7 @@ class Block(pygame.sprite.Sprite):
             (UP, UP): self.images[2],
             (DOWN, DOWN): self.images[2],
             (LEFT, LEFT): pygame.transform.rotate(self.images[2], 90),
-            (RIGHT, RIGHT): pygame.transform.rotate(self.images[2], 90)
+            (RIGHT, RIGHT): pygame.transform.rotate(self.images[2], 90),
         }
         self.image = self.images[2]
         self.rect = self.image.get_rect()
@@ -96,14 +95,22 @@ class Snake(pygame.sprite.Sprite):
 
     def update(self):
         # Vector for x y position of block of the head of the snake
-        head_vector = np.array(self.pixels[-1].rect, dtype=int)
+        head_vector = np.array(self.pixels[-1].rect.topleft, dtype=float)
         # Vector for x y position of block behind the head
-        vector_behing_1 = np.array(self.pixels[-2].rect, dtype=int)
+        vector_behind_1 = np.array(self.pixels[-2].rect.topleft, dtype=float)
         # Vector for x y position of block two places behind the head
-        vector_behind_2 = np.array(self.pixels[-3].rect, dtype=int)
+        vector_behind_2 = np.array(self.pixels[-3].rect.topleft, dtype=float)
 
-        vector_1 = head_vector - vector_behing_1
-        vector_2 = vector_behing_1 - vector_behind_2
+        print(head_vector, vector_behind_1, vector_behind_2)
+        vector_1: np.ndarray = head_vector - vector_behind_1
+        vector_2: np.ndarray = vector_behind_1 - vector_behind_2
+        print(vector_1, vector_2)
+
+        vector_1 /= vector_1
+        vector_2 /= vector_2
+
+        vector_1 = np.nan_to_num(vector_1)
+        vector_2 = np.nan_to_num(vector_2)
         x_y_1 = (vector_1[0], vector_1[1])
         x_y_2 = (vector_2[0], vector_2[1])
 
@@ -113,7 +120,7 @@ class Snake(pygame.sprite.Sprite):
             temp_image = self.pixels[i].image
             self.pixels[i].image = running_image
             running_image = temp_image
-        self.pixels[-1].image = Block.movement_to_image[(x_y_1, x_y_2)]
+        self.pixels[-1].image = block.movement_to_image[(x_y_1, x_y_1)]
 
     def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
@@ -139,11 +146,11 @@ class Snake(pygame.sprite.Sprite):
         self.head_x += delta_x
         self.head_y += delta_y
         self.rect.topleft = (self.head_x, self.head_y)
-        new_block = Block(self.size, (self.head_x, self.head_y))
+        new_block = Block(self.size, self.rect.topleft)
         self.pixels.append(new_block)
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
-        self.update()
+        #self.update()
 
     def directions(self, event, delta_x, delta_y):
         if self.controls == Snake.Controls.KEYS:
@@ -169,8 +176,12 @@ class Snake(pygame.sprite.Sprite):
                 delta_y = -self.size if event.key == K_UP else self.size
             return (delta_x, delta_y)
 
-        current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
-        current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
+        current_delta_x = (
+            self.pixels[-1].rect.topleft[0] - self.pixels[-2].rect.topleft[0]
+        )
+        current_delta_y = (
+            self.pixels[-1].rect.topleft[1] - self.pixels[-2].rect.topleft[1]
+        )
 
         if event.key in (K_LEFT, K_RIGHT):
             """Snake is moving up or down"""
@@ -201,9 +212,12 @@ class Snake(pygame.sprite.Sprite):
                 delta_y = -self.size if event.key == K_w else self.size
             return (delta_x, delta_y)
 
-        current_delta_x = self.pixels[-1][0] - self.pixels[-2][0]
-        current_delta_y = self.pixels[-1][1] - self.pixels[-2][1]
-
+        current_delta_x = (
+            self.pixels[-1].rect.topleft[0] - self.pixels[-2].rect.topleft[0]
+        )
+        current_delta_y = (
+            self.pixels[-1].rect.topleft[1] - self.pixels[-2].rect.topleft[1]
+        )
         if event.key in (K_a, K_d):
             """Snake is going up or down"""
             if current_delta_x == 0:
