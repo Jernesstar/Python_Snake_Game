@@ -2,6 +2,8 @@ from enum import Enum
 import os
 from pathlib import Path
 
+import numpy as np
+
 import pygame
 from pygame import (
     K_LEFT, K_RIGHT, K_UP, K_DOWN, 
@@ -13,6 +15,7 @@ UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
+
 
 class Apple(pygame.sprite.Sprite):
 
@@ -31,18 +34,6 @@ class Block(pygame.sprite.Sprite):
     containers: pygame.sprite.RenderUpdates()
     images = []
     size = 50
-    movement_to_image = {
-        (LEFT, UP): images[3],
-        (RIGHT, UP): images[4],
-        (LEFT, DOWN): pygame.transform.rotate(images[3], -90),
-        (RIGHT, DOWN): pygame.transform.rotate(images[4], 90),
-        (UP, LEFT): images[0],
-        (UP, RIGHT): images[1],
-        (DOWN, LEFT): images[3],
-        (DOWN, RIGHT): images[4],
-        (UP, UP): images[2],
-        (RIGHT, RIGHT): images[2]
-    }
 
     def __init__(self, size, pos: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self)
@@ -57,9 +48,24 @@ class Block(pygame.sprite.Sprite):
         self.images = [
             pygame.transform.scale(im, (size, size)) for im in self.images
         ]
+        self.movement_to_image = {
+            (LEFT, UP): self.images[3],
+            (RIGHT, UP): self.images[4],
+            (LEFT, DOWN): pygame.transform.rotate(self.images[3], -90),
+            (RIGHT, DOWN): pygame.transform.rotate(self.images[4], 90),
+            (UP, LEFT): self.images[0],
+            (UP, RIGHT): self.images[1],
+            (DOWN, LEFT): self.images[3],
+            (DOWN, RIGHT): self.images[4],
+            (UP, UP): self.images[2],
+            (DOWN, DOWN): self.images[2],
+            (LEFT, LEFT): pygame.transform.rotate(self.images[2], 90),
+            (RIGHT, RIGHT): pygame.transform.rotate(self.images[2], 90)
+        }
         self.image = self.images[2]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
+        self.update()
     
         
 class Snake(pygame.sprite.Sprite):
@@ -81,6 +87,7 @@ class Snake(pygame.sprite.Sprite):
         self.controls = controls
         self.size = game.square_size
         self.pixels = []
+        self.block = Block(50, (44, 44))
 
     def reset(self):
         self.pixels = []
@@ -88,7 +95,10 @@ class Snake(pygame.sprite.Sprite):
         self.length = 3
 
     def update(self):
-        pass
+        for i in range(len(self.pixels) - 1):
+            current_vector = np.array(self.pixels[i].rect, dtype=int)
+            vector_ahead = np.array(self.pixels[i + 1].rect, dtype=int)
+            vector_behind = np.array(self.pixels[i - 1].rect, dtype=int)
 
     def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
