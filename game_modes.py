@@ -9,7 +9,7 @@ from pygame import (
 )
 from pygame import sprite
 
-from sprites import Snake, Apple
+from sprites import Block, Snake, Apple
 
 pygame.init()
 
@@ -35,6 +35,7 @@ class Game_Mode:
         self.game_display = game.game_display
         self.display_width = game.width
         self.display_height = game.height
+        self.size = game.square_size
         self.tiled_background = self.tile_background()
         self.apples: sprite.Group = game.apples
 
@@ -50,7 +51,7 @@ class Game_Mode:
         quit()
 
     def make_fruits(self, number: int):
-        size = self.snake_1.size
+        size = self.size
         if number == 1:
             Apple(size, self.rand_x_y())
         else:
@@ -58,7 +59,7 @@ class Game_Mode:
 
     def tile_background(self) -> pygame.Surface:
         colors = [self.light_green, self.dark_green]
-        size = self.snake_1.size
+        size = self.size
         w, h = self.display_width, self.display_height
         background = pygame.Surface([w, h])
         for x in range(self.display_width // size):
@@ -75,9 +76,8 @@ class Game_Mode:
         self.game_display.blit(text_1, [3, 0])
 
     def draw_snake(self):
-        size = self.snake_1.size
-        for x, y, in self.snake_1.pixels:
-            pygame.draw.rect(self.game_display, self.black, [x, y, size, size])
+        for block in self.snake_1.pixels:
+            self.game_display.blit(block.image, block.rect)
 
     def draw_fruit(self):
         self.apples.clear(self.game_display, self.game_display)
@@ -104,7 +104,6 @@ class Game_Mode:
                         self.end()
                     if event.key == K_SPACE:
                         return True
-
             offset_1 = self.message_font.size(message)[0] / 2
             offset_2 = self.message_font.size(message_2)[0] / 2
             
@@ -119,9 +118,9 @@ class Game_Mode:
             return not paused # negates the current paused state
 
     def rand_x_y(self) -> tuple[int, int]:
-        size = self.snake_1.size
-        rand_x = randrange(0, self.snake_1.display_width // size) * size
-        rand_y = randrange(0, self.snake_1.display_height // size) * size
+        size = self.size
+        rand_x = randrange(0, (self.display_width - size) // size) * size
+        rand_y = randrange(0, (self.display_height - size) // size) * size
         if (rand_x, rand_y) not in self.snake_1.pixels:
             return (rand_x, rand_y)
         else:
@@ -130,7 +129,7 @@ class Game_Mode:
     def check_for_fruit_collisions(self):
         # Check if the snake has eaten an apple
         for _ in sprite.spritecollide(self.snake_1, self.apples, 1):
-            Apple(self.snake_1.size, self.rand_x_y())
+            Apple(self.size, self.rand_x_y())
             self.snake_1.score += 1
             self.snake_1.length += 1
 
@@ -166,14 +165,22 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.update()
 
     def run(self, options):
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
+        (self.snake_1.head_x, self.snake_1.head_y) = (
+            self.display_width / 2 - 5 * self.size, 
+            self.display_height / 2
+        )
+        for i in range(1, 3 + 1):
+            x = self.snake_1.head_x - i * self.size
+            block = Block(self.size, (x, self.display_height / 2))
+            self.snake_1.pixels.append(block)
+
         game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
         try:
             self.make_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
-            Apple(self.snake_1.size, self.rand_x_y())
+            Apple(self.size, self.rand_x_y())
             speed = 10
         while game_over == False:
             for event in pygame.event.get():
@@ -192,6 +199,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
             if paused:
                 see_menu = self.pause_screen()
             if see_menu:
+                self.apples.empty()
                 return (False, True)
             paused = False
 
@@ -249,7 +257,7 @@ class TwoPlayer_Snake(Game_Mode):
     def check_for_fruit_collisions(self):
         super().check_for_fruit_collisions()
         for _ in sprite.spritecollide(self.snake_2, self.apples, 1):
-            Apple(self.snake_1.size, self.rand_x_y())
+            Apple(self.size, self.rand_x_y())
             self.snake_2.score += 1
             self.snake_2.length += 1
     
@@ -282,16 +290,30 @@ class TwoPlayer_Snake(Game_Mode):
             self.update()
         
     def run(self, options):        
-        (self.snake_1.head_x, self.snake_1.head_y) = self.rand_x_y()
-        (self.snake_2.head_x, self.snake_2.head_y) = self.rand_x_y()
-        
+        (self.snake_1.head_x, self.snake_1.head_y) = (
+            self.display_width / 2 - 5 * self.size, 
+            self.display_height / 2
+        )
+        (self.snake_2.head_x, self.snake_2.head_y) = (
+            self.display_width / 2 + 4 * self.snake_2.size, 
+            self.display_height / 2
+        )
+        for i in range(1, 3 + 1):
+            x = self.snake_1.head_x - i * self.size
+            block = Block(self.size, (x, self.display_height / 2))
+            self.snake_1.pixels.append(block)
+        for i in range(1, 3 + 1):
+            x = self.snake_2.head_x + i * self.size
+            block = Block(self.size, (x, self.display_height / 2))
+            self.snake_2.pixels.append(block)
+
         delta_x_1, delta_y_1, delta_x_2, delta_y_2 = 0, 0, 0, 0
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
             self.make_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
-            Apple(self.snake_1.size)
+            Apple(self.size)
             speed = 10
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():

@@ -34,11 +34,12 @@ class Block(pygame.sprite.Sprite):
     containers: pygame.sprite.RenderUpdates()
     images = []
     size = 50
+    movement_to_image: dict
 
     def __init__(self, size, pos: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self)
         path = Path(os.path.split(__file__)[0]) / "resources"
-        self.images = [
+        images = [
             pygame.image.load(path / "block_left_up.png").convert(),
             pygame.image.load(path / "block_right_up.png").convert(),
             pygame.image.load(path / "block_straight.png").convert(),
@@ -46,7 +47,7 @@ class Block(pygame.sprite.Sprite):
             pygame.image.load(path / "block_up_right.png").convert()
         ]
         self.images = [
-            pygame.transform.scale(im, (size, size)) for im in self.images
+            pygame.transform.scale(im, (size, size)) for im in images
         ]
         self.movement_to_image = {
             (LEFT, UP): self.images[3],
@@ -74,7 +75,7 @@ class Snake(pygame.sprite.Sprite):
         KEYS = 1
         WASD = 2
 
-    score, size, length = 0, 10, 1
+    score, size, length = 0, 10, 3
     head_x, head_y = 250, 250
 
     def __init__(self, game, name: str, controls=Controls.KEYS):
@@ -86,19 +87,33 @@ class Snake(pygame.sprite.Sprite):
         self.display_height = game.height
         self.controls = controls
         self.size = game.square_size
-        self.pixels = []
-        self.block = Block(50, (44, 44))
+        self.pixels: list[Block] = []
 
     def reset(self):
         self.pixels = []
         self.score = 0
-        self.length = 1
+        self.length = 3
 
     def update(self):
-        for i in range(len(self.pixels) - 1):
-            current_vector = np.array(self.pixels[i].rect, dtype=int)
-            vector_ahead = np.array(self.pixels[i + 1].rect, dtype=int)
-            vector_behind = np.array(self.pixels[i - 1].rect, dtype=int)
+        # Vector for x y position of block of the head of the snake
+        head_vector = np.array(self.pixels[-1].rect, dtype=int)
+        # Vector for x y position of block behind the head
+        vector_behing_1 = np.array(self.pixels[-2].rect, dtype=int)
+        # Vector for x y position of block two places behind the head
+        vector_behind_2 = np.array(self.pixels[-3].rect, dtype=int)
+
+        vector_1 = head_vector - vector_behing_1
+        vector_2 = vector_behing_1 - vector_behind_2
+        x_y_1 = (vector_1[0], vector_1[1])
+        x_y_2 = (vector_2[0], vector_2[1])
+
+        block = Block(1, (1, 1))
+        running_image = block.movement_to_image[(x_y_1, x_y_2)]
+        for i in reversed(range(len(self.pixels) - 1)): # Avoid the head
+            temp_image = self.pixels[i].image
+            self.pixels[i].image = running_image
+            running_image = temp_image
+        self.pixels[-1].image = Block.movement_to_image[(x_y_1, x_y_2)]
 
     def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in self.pixels[:-1]:
@@ -124,9 +139,11 @@ class Snake(pygame.sprite.Sprite):
         self.head_x += delta_x
         self.head_y += delta_y
         self.rect.topleft = (self.head_x, self.head_y)
-        self.pixels.append((self.head_x, self.head_y))
+        new_block = Block(self.size, (self.head_x, self.head_y))
+        self.pixels.append(new_block)
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
+        self.update()
 
     def directions(self, event, delta_x, delta_y):
         if self.controls == Snake.Controls.KEYS:
