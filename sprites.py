@@ -74,7 +74,7 @@ class Snake(pygame.sprite.Sprite):
         KEYS = 1
         WASD = 2
 
-    score, size, length = 0, 10, 3
+    score, size, length = 0, 10, 1
     head_x, head_y = 250, 250
 
     def __init__(self, game, name: str, controls=Controls.KEYS):
@@ -92,7 +92,7 @@ class Snake(pygame.sprite.Sprite):
     def reset(self):
         self.pixels = []
         self.score = 0
-        self.length = 3
+        self.length = 1
 
     def update(self):
         for i in range(len(self.pixels) - 1):

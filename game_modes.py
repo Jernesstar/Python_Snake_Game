@@ -184,7 +184,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                         return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
-                    # Since only one snake, allow for KEYS or WASD  
+                    # Since only one snake, allow for KEYS or WASD
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
