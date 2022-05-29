@@ -9,6 +9,11 @@ from pygame import (
 )
 
 
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+
 class Apple(pygame.sprite.Sprite):
 
     containers: pygame.sprite.Group
@@ -27,14 +32,16 @@ class Block(pygame.sprite.Sprite):
     images = []
     size = 50
     movement_to_image = {
-        # snake going up from left
-        ((-size, 0), (0, -size)): images[3],
-        # snake going up from right
-        ((size, 0), (0, -size)): images[4],
-        # snake going down from left
-        ((-size, 0), (0, size)): pygame.transform.rotate(images[3], -90),
-        # snake going down from right
-        ((size, 0), (0, size)): pygame.transform.rotate(images[4], 90)
+        (LEFT, UP): images[3],
+        (RIGHT, UP): images[4],
+        (LEFT, DOWN): pygame.transform.rotate(images[3], -90),
+        (RIGHT, DOWN): pygame.transform.rotate(images[4], 90),
+        (UP, LEFT): images[0],
+        (UP, RIGHT): images[1],
+        (DOWN, LEFT): images[3],
+        (DOWN, RIGHT): images[4],
+        (UP, UP): images[2],
+        (RIGHT, RIGHT): images[2]
     }
 
     def __init__(self, size, pos: tuple[int, int]):
