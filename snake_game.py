@@ -106,7 +106,7 @@ class SnakeGame:
                             show_warn_valid = True
                         else: 
                             return name
-                    elif 26 > len(name) >= 0:
+                    elif 30 > len(name) >= 0:
                         name += event.unicode
             text = self.message_font.render(message, True, self.white)
             name_text = self.option_font.render(name, True, self.white)

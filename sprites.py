@@ -11,10 +11,10 @@ from pygame import (
 )
 
 
-UP = (0.0, -1.0)
-DOWN = (0.0, 1.0)
-LEFT = (-1.0, 0.0)
-RIGHT = (1.0, 0.0)
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
 
 
 class Apple(pygame.sprite.Sprite):
@@ -61,10 +61,12 @@ class Block(pygame.sprite.Sprite):
             (LEFT, LEFT): pygame.transform.rotate(self.images[2], 90),
             (RIGHT, RIGHT): pygame.transform.rotate(self.images[2], 90),
         }
-        self.image = self.images[2]
+        self.image = self.images[3]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.update()
+
+    def update(self, new_image: pygame.Surface):
+        self.image = new_image
     
         
 class Snake(pygame.sprite.Sprite):
@@ -93,6 +95,7 @@ class Snake(pygame.sprite.Sprite):
         self.length = 3
 
     def update(self):
+        np.seterr(invalid='ignore')
         # Vector for x y position of block of the head of the snake
         head_vector = np.array(self.pixels[-1].rect.topleft, dtype=float)
         # Vector for x y position of block behind the head
@@ -108,16 +111,17 @@ class Snake(pygame.sprite.Sprite):
 
         vector_1 = np.nan_to_num(vector_1, nan=0)
         vector_2 = np.nan_to_num(vector_2, nan=0)
-        x_y_1 = (vector_1[0], vector_1[1])
-        x_y_2 = (vector_2[0], vector_2[1])
+        x_y_1 = (int(vector_1[0]), int(vector_1[1]))
+        x_y_2 = (int(vector_2[0]), int(vector_2[1]))
 
         block = Block(1, (1, 1))
         running_image = block.movement_to_image[(x_y_1, x_y_2)]
         for i in reversed(range(len(self.pixels) - 1)): # Avoids head
-            temp_image = self.pixels[i].image
-            self.pixels[i].image = running_image
-            running_image = temp_image
-        self.pixels[-1].image = block.movement_to_image[(x_y_1, x_y_1)]
+            pass#self.pixels[i].update(block.movement_to_image[(x_y_1, x_y_2)])
+            # temp_image = self.pixels[i].image
+            # self.pixels[i].image = running_image
+            # running_image = temp_image
+        self.pixels[-1].update(block.movement_to_image[(x_y_1, x_y_2)])
 
     def check_for_game_over(self, game_over):
         if (self.head_x, self.head_y) in (
@@ -143,7 +147,6 @@ class Snake(pygame.sprite.Sprite):
     def move(self, delta_x, delta_y):
         if (delta_x, delta_y) == (0, 0):
             return
-        #self.update()
         self.head_x += delta_x
         self.head_y += delta_y
         self.rect.topleft = (self.head_x, self.head_y)
@@ -151,6 +154,7 @@ class Snake(pygame.sprite.Sprite):
         self.pixels.append(new_block)
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
+        self.update()
 
     def directions(self, event, delta_x, delta_y):
         if self.controls == Snake.Controls.KEYS:
