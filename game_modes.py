@@ -75,6 +75,7 @@ class Game_Mode:
         self.game_display.blit(text_1, [3, 0])
 
     def draw_snake(self):
+        self.game_display.blit(self.snake_1.eye, self.snake_1.rect.topleft)
         for block in self.snake_1.pixels:
             self.game_display.blit(block.image, block.rect)
 
