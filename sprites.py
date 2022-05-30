@@ -11,10 +11,10 @@ from pygame import (
 )
 
 
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
+UP = (0.0, -1.0)
+DOWN = (0.0, 1.0)
+LEFT = (-1.0, 0.0)
+RIGHT = (1.0, 0.0)
 
 
 class Apple(pygame.sprite.Sprite):
@@ -33,7 +33,6 @@ class Block(pygame.sprite.Sprite):
     
     images = []
     size = 50
-    movement_to_image: dict
 
     def __init__(self, size, pos: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self)
@@ -95,25 +94,26 @@ class Snake(pygame.sprite.Sprite):
 
     def update(self):
         # Vector for x y position of block of the head of the snake
-        head_vector = np.array(self.pixels[-1].rect.topleft, dtype=int)
+        head_vector = np.array(self.pixels[-1].rect.topleft, dtype=float)
         # Vector for x y position of block behind the head
-        vector_behind_1 = np.array(self.pixels[-2].rect.topleft, dtype=int)
+        vector_behind_1 = np.array(self.pixels[-2].rect.topleft, dtype=float)
         # Vector for x y position of block two places behind the head
-        vector_behind_2 = np.array(self.pixels[-3].rect.topleft, dtype=int)
+        vector_behind_2 = np.array(self.pixels[-3].rect.topleft, dtype=float)
 
-        vector_1: np.ndarray = head_vector - vector_behind_1
-        vector_2: np.ndarray = vector_behind_1 - vector_behind_2
-        vector_1 //= vector_1
-        vector_2 //= vector_2
+        vector_1: np.ndarray = vector_behind_1 - vector_behind_2
+        vector_2: np.ndarray = head_vector - vector_behind_1
 
-        vector_1 = np.nan_to_num(vector_1)
-        vector_2 = np.nan_to_num(vector_2)
+        vector_1 /= vector_1
+        vector_2 /= vector_2
+
+        vector_1 = np.nan_to_num(vector_1, nan=0)
+        vector_2 = np.nan_to_num(vector_2, nan=0)
         x_y_1 = (vector_1[0], vector_1[1])
         x_y_2 = (vector_2[0], vector_2[1])
 
         block = Block(1, (1, 1))
         running_image = block.movement_to_image[(x_y_1, x_y_2)]
-        for i in reversed(range(len(self.pixels) - 1)): # Avoid the head
+        for i in reversed(range(len(self.pixels) - 1)): # Avoids head
             temp_image = self.pixels[i].image
             self.pixels[i].image = running_image
             running_image = temp_image
@@ -143,6 +143,7 @@ class Snake(pygame.sprite.Sprite):
     def move(self, delta_x, delta_y):
         if (delta_x, delta_y) == (0, 0):
             return
+        #self.update()
         self.head_x += delta_x
         self.head_y += delta_y
         self.rect.topleft = (self.head_x, self.head_y)
@@ -150,7 +151,6 @@ class Snake(pygame.sprite.Sprite):
         self.pixels.append(new_block)
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
-        self.update()
 
     def directions(self, event, delta_x, delta_y):
         if self.controls == Snake.Controls.KEYS:
@@ -174,7 +174,19 @@ class Snake(pygame.sprite.Sprite):
         current_delta_y = (
             self.pixels[-1].rect.top - self.pixels[-2].rect.top
         )
-        if event.key in (K_LEFT, K_RIGHT):
+        if len(self.pixels) == self.length and (delta_x, delta_y) == (0, 0):
+            if event.key in (K_LEFT, K_RIGHT):
+                if current_delta_x == self.size:
+                    delta_x = self.size if event.key == K_RIGHT else 0
+                    delta_y = 0
+                if current_delta_x == -self.size:
+                    delta_x = self.size if event.key == K_LEFT else 0
+                    delta_y = 0
+            elif event.key in (K_UP, K_DOWN):
+                if current_delta_y == 0:
+                    delta_x = 0
+                    delta_y = -self.size if event.key == K_UP else self.size
+        elif event.key in (K_LEFT, K_RIGHT):
             """Snake is moving up or down"""
             if current_delta_x == 0:
                 delta_x = -self.size if event.key == K_LEFT else self.size
@@ -194,13 +206,18 @@ class Snake(pygame.sprite.Sprite):
         """
         if self.pixels == []:
             return (0, 0)
-
         current_delta_x = (
             self.pixels[-1].rect.left - self.pixels[-2].rect.left
         )
         current_delta_y = (
             self.pixels[-1].rect.top - self.pixels[-2].rect.top
         )
+        if len(self.pixels) == self.length and (delta_x, delta_y) == (0, 0):
+            if current_delta_x == self.size:
+                delta_x = self.size if event.key == K_d else 0
+            if current_delta_x == -self.size:
+                delta_x = self.size if event.key == K_a else 0
+            delta_y = -self.size if event.key == K_w else self.size
         if event.key in (K_a, K_d):
             """Snake is going up or down"""
             if current_delta_x == 0:

@@ -50,7 +50,7 @@ class Game_Mode:
         pygame.quit()
         quit()
 
-    def make_fruits(self, number: int):
+    def spawn_fruits(self, number: int):
         size = self.size
         if number == 1:
             Apple(size, self.rand_x_y())
@@ -60,8 +60,7 @@ class Game_Mode:
     def tile_background(self) -> pygame.Surface:
         colors = [self.light_green, self.dark_green]
         size = self.size
-        w, h = self.display_width, self.display_height
-        background = pygame.Surface([w, h])
+        background = pygame.Surface([self.display_width, self.display_height])
         for x in range(self.display_width // size):
             for y in range(self.display_height // size):
                 pygame.draw.rect(
@@ -178,7 +177,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
         game_over, paused, see_menu = False, False, False 
         delta_x, delta_y = 0, 0
         try:
-            self.make_fruits(options["fruit_count"])
+            self.spawn_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
             Apple(self.size, self.rand_x_y())
@@ -310,7 +309,7 @@ class TwoPlayer_Snake(Game_Mode):
         delta_x_1, delta_y_1, delta_x_2, delta_y_2 = 0, 0, 0, 0
         paused, game_over_1, game_over_2, see_menu = False, False, False, False
         try:
-            self.make_fruits(options["fruit_count"])
+            self.spawn_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
             Apple(self.size)
