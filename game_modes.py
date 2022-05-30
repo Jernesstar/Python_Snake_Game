@@ -169,7 +169,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.display_width / 2 - 5 * self.size, 
             self.display_height / 2
         )
-        for i in range(self.snake_1.length):
+        for i in range(1, self.snake_1.length + 1):
             x = self.snake_1.head_x - ((self.snake_1.length - i) * self.size)
             block = Block(self.size, (x, self.snake_1.head_y))
             self.snake_1.pixels.append(block)
@@ -297,11 +297,11 @@ class TwoPlayer_Snake(Game_Mode):
             self.display_width / 2 + 4 * self.snake_2.size, 
             self.display_height / 2
         )
-        for i in range(self.snake_1.length):
+        for i in range(1, self.snake_1.length + 1):
             x = self.snake_1.head_x - ((self.snake_1.length - i) * self.size)
             block = Block(self.size, (x, self.display_height / 2))
             self.snake_1.pixels.append(block)
-        for i in range(self.snake_2.length):
+        for i in range(1, self.snake_2.length + 1):
             x = self.snake_2.head_x + ((self.snake_2.length - i) * self.size)
             block = Block(self.size, (x, self.display_height / 2))
             self.snake_2.pixels.append(block)
