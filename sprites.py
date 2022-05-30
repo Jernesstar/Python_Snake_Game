@@ -95,19 +95,16 @@ class Snake(pygame.sprite.Sprite):
 
     def update(self):
         # Vector for x y position of block of the head of the snake
-        head_vector = np.array(self.pixels[-1].rect.topleft, dtype=float)
+        head_vector = np.array(self.pixels[-1].rect.topleft, dtype=int)
         # Vector for x y position of block behind the head
-        vector_behind_1 = np.array(self.pixels[-2].rect.topleft, dtype=float)
+        vector_behind_1 = np.array(self.pixels[-2].rect.topleft, dtype=int)
         # Vector for x y position of block two places behind the head
-        vector_behind_2 = np.array(self.pixels[-3].rect.topleft, dtype=float)
+        vector_behind_2 = np.array(self.pixels[-3].rect.topleft, dtype=int)
 
-        print(head_vector, vector_behind_1, vector_behind_2)
         vector_1: np.ndarray = head_vector - vector_behind_1
         vector_2: np.ndarray = vector_behind_1 - vector_behind_2
-        print(vector_1, vector_2)
-
-        vector_1 /= vector_1
-        vector_2 /= vector_2
+        vector_1 //= vector_1
+        vector_2 //= vector_2
 
         vector_1 = np.nan_to_num(vector_1)
         vector_2 = np.nan_to_num(vector_2)
@@ -123,7 +120,8 @@ class Snake(pygame.sprite.Sprite):
         self.pixels[-1].image = block.movement_to_image[(x_y_1, x_y_1)]
 
     def check_for_game_over(self, game_over):
-        if (self.head_x, self.head_y) in self.pixels[:-1]:
+        if (self.head_x, self.head_y) in (
+            block.rect.topleft for block in self.pixels[:-1]):
             return True
         if self.check_for_out_of_bounds(game_over):
             return True
@@ -143,6 +141,8 @@ class Snake(pygame.sprite.Sprite):
         return False
             
     def move(self, delta_x, delta_y):
+        if (delta_x, delta_y) == (0, 0):
+            return
         self.head_x += delta_x
         self.head_y += delta_y
         self.rect.topleft = (self.head_x, self.head_y)
@@ -150,7 +150,7 @@ class Snake(pygame.sprite.Sprite):
         self.pixels.append(new_block)
         if len(self.pixels) > self.length:
             self.pixels.pop(0)
-        #self.update()
+        self.update()
 
     def directions(self, event, delta_x, delta_y):
         if self.controls == Snake.Controls.KEYS:
@@ -167,22 +167,13 @@ class Snake(pygame.sprite.Sprite):
         """
         if self.pixels == []:
             return (0, 0)
-        if len(self.pixels) == 1:
-            if event.key in (K_LEFT, K_RIGHT):
-                delta_x = -self.size if event.key == K_LEFT else self.size
-                delta_y = 0
-            elif event.key in (K_UP, K_DOWN):
-                delta_x = 0
-                delta_y = -self.size if event.key == K_UP else self.size
-            return (delta_x, delta_y)
 
         current_delta_x = (
-            self.pixels[-1].rect.topleft[0] - self.pixels[-2].rect.topleft[0]
+            self.pixels[-1].rect.left - self.pixels[-2].rect.left
         )
         current_delta_y = (
-            self.pixels[-1].rect.topleft[1] - self.pixels[-2].rect.topleft[1]
+            self.pixels[-1].rect.top - self.pixels[-2].rect.top
         )
-
         if event.key in (K_LEFT, K_RIGHT):
             """Snake is moving up or down"""
             if current_delta_x == 0:
@@ -202,21 +193,13 @@ class Snake(pygame.sprite.Sprite):
         See docstring for `get_directions_keys`
         """
         if self.pixels == []:
-            return (0, 0) 
-        if len(self.pixels) == 1:
-            if event.key in (K_a, K_d):
-                delta_x = -self.size if event.key == K_a else self.size
-                delta_y = 0
-            elif event.key in (K_w, K_s):
-                delta_x = 0
-                delta_y = -self.size if event.key == K_w else self.size
-            return (delta_x, delta_y)
+            return (0, 0)
 
         current_delta_x = (
-            self.pixels[-1].rect.topleft[0] - self.pixels[-2].rect.topleft[0]
+            self.pixels[-1].rect.left - self.pixels[-2].rect.left
         )
         current_delta_y = (
-            self.pixels[-1].rect.topleft[1] - self.pixels[-2].rect.topleft[1]
+            self.pixels[-1].rect.top - self.pixels[-2].rect.top
         )
         if event.key in (K_a, K_d):
             """Snake is going up or down"""

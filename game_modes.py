@@ -121,7 +121,8 @@ class Game_Mode:
         size = self.size
         rand_x = randrange(0, (self.display_width - size) // size) * size
         rand_y = randrange(0, (self.display_height - size) // size) * size
-        if (rand_x, rand_y) not in self.snake_1.pixels:
+        if (rand_x, rand_y) not in (
+            block.rect.topleft for block in self.snake_1.pixels):
             return (rand_x, rand_y)
         else:
             return self.rand_x_y()
@@ -169,9 +170,8 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.display_width / 2 - 5 * self.size, 
             self.display_height / 2
         )
-        self.snake_1.length = 3
-        for i in range(3):
-            x = self.snake_1.head_x - (i * self.size)
+        for i in range(self.snake_1.length):
+            x = self.snake_1.head_x - ((self.snake_1.length - i) * self.size)
             block = Block(self.size, (x, self.snake_1.head_y))
             self.snake_1.pixels.append(block)
 
@@ -192,7 +192,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
                         return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
-                    # Since only one snake, allow for KEYS or WASD
+                    # Since only one snake, allow for KEYS and WASD
                     (delta_x, delta_y) = self.snake_1.get_directions_keys(
                         event, delta_x, delta_y)
                     (delta_x, delta_y) = self.snake_1.get_directions_wasd(
@@ -203,12 +203,10 @@ class OnePlayer_Classic_Snake(Game_Mode):
                 self.apples.empty()
                 return (False, True)
             paused = False
-
             self.snake_1.move(delta_x, delta_y)
             game_over = self.snake_1.check_for_game_over(game_over)
             self.check_for_fruit_collisions()
 
-            self.game_display.fill(self.white)
             self.game_display.blit(self.tiled_background, [0, 0])
             self.draw_fruit()
             self.draw_snake()
@@ -233,7 +231,8 @@ class TwoPlayer_Snake(Game_Mode):
 
     def rand_x_y(self):
         (rand_x, rand_y) = super().rand_x_y()
-        if (rand_x, rand_y) not in self.snake_2.pixels:
+        if (rand_x, rand_y) not in (
+            block.rect.topleft for block in self.snake_2.pixels):
             return (rand_x, rand_y)
         else:
             return self.rand_x_y()
@@ -299,14 +298,12 @@ class TwoPlayer_Snake(Game_Mode):
             self.display_width / 2 + 4 * self.snake_2.size, 
             self.display_height / 2
         )
-        self.snake_1.length = 3
-        self.snake_2.length = 3
-        for i in range(3):
-            x = self.snake_1.head_x - (i * self.size)
+        for i in range(self.snake_1.length):
+            x = self.snake_1.head_x - ((self.snake_1.length - i) * self.size)
             block = Block(self.size, (x, self.display_height / 2))
             self.snake_1.pixels.append(block)
-        for i in range(3):
-            x = self.snake_2.head_x + (i * self.size)
+        for i in range(self.snake_2.length):
+            x = self.snake_2.head_x + ((self.snake_2.length - i) * self.size)
             block = Block(self.size, (x, self.display_height / 2))
             self.snake_2.pixels.append(block)
 
