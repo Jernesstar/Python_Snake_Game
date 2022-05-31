@@ -75,9 +75,12 @@ class Game_Mode:
         self.game_display.blit(text_1, [3, 0])
 
     def draw_snake(self):
-        self.game_display.blit(self.snake_1.eye, self.snake_1.rect.topleft)
         for block in self.snake_1.pixels:
-            self.game_display.blit(block.image, block.rect)
+            self.game_display.blit(block.image, block.rect.topleft) 
+        pos_1 = self.snake_1.eye_rect_1
+        pos_2 = self.snake_1.eye_rect_2
+        self.game_display.blit(self.snake_1.eye, pos_1)
+        self.game_display.blit(self.snake_1.eye, pos_2)
 
     def draw_fruit(self):
         self.apples.clear(self.game_display, self.tiled_background)
@@ -170,6 +173,8 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.display_width / 2 - 5 * self.size, 
             self.display_height / 2
         )
+        self.snake_1.rect.topleft = (self.snake_1.head_x, self.snake_1.head_y)
+        
         for i in range(1, self.snake_1.length + 1):
             x = self.snake_1.head_x - ((self.snake_1.length - i) * self.size)
             block = Block(self.size, (x, self.snake_1.head_y))

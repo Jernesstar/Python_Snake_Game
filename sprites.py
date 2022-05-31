@@ -38,11 +38,11 @@ class Block(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         path = Path(os.path.split(__file__)[0]) / "resources"
         images = [
-            pygame.image.load(path / "block_left_up.png").convert(),
-            pygame.image.load(path / "block_right_up.png").convert(),
-            pygame.image.load(path / "block_straight.png").convert(),
-            pygame.image.load(path / "block_up_left.png").convert(),
-            pygame.image.load(path / "block_up_right.png").convert()
+            pygame.image.load(path / "block_left_up.png").convert_alpha(),
+            pygame.image.load(path / "block_right_up.png").convert_alpha(),
+            pygame.image.load(path / "block_straight.png").convert_alpha(),
+            pygame.image.load(path / "block_up_left.png").convert_alpha(),
+            pygame.image.load(path / "block_up_right.png").convert_alpha()
         ]
         self.images = [
             pygame.transform.scale(im, (size, size)) for im in images
@@ -80,8 +80,8 @@ class Snake(pygame.sprite.Sprite):
 
     def __init__(self, game, name: str, controls=Controls.KEYS):
         pygame.sprite.Sprite.__init__(self)
-        pos, rect = (self.head_x, self.head_y), (self.size, self.size)
-        self.rect = pygame.rect.Rect(pos, rect)
+        pos, width_height = (self.head_x, self.head_y), (self.size, self.size)
+        self.rect = pygame.rect.Rect(pos, width_height)
         self.name = name.strip()
         self.display_width = game.width
         self.display_height = game.height
@@ -89,11 +89,15 @@ class Snake(pygame.sprite.Sprite):
         self.size = game.square_size
         self.pixels: list[Block] = []
         path = Path(os.path.split(__file__)[0]) / "resources"
-        self._eye = pygame.image.load(path / "snake_eye_open.png").convert()
+        self._eye = pygame.image.load(path / "snake_eye_open.png").convert_alpha()
         self._eye = pygame.transform.scale(
-            self._eye, (self.size / 4, self.size / 4)
+            self._eye, (self.size / 2.5, self.size / 2.5)
         )
         self.eye = self._eye
+        self.eye_rect_1 = self.eye.get_rect()
+        self.eye_rect_2 = self.eye.get_rect()
+        self.eye_rect_1.topleft = self.rect.topleft
+        self.eye_rect_2.topleft = self.rect.topleft
 
     def reset(self):
         self.pixels = []
@@ -123,17 +127,30 @@ class Snake(pygame.sprite.Sprite):
         # block = Block(1, (1, 1))
         # running_image = block.movement_to_image[(x_y_1, x_y_2)]
         # for i in reversed(range(len(self.pixels) - 1)): # Avoids head
-        #     pass#self.pixels[i].update(block.movement_to_image[(x_y_1, x_y_2)])
-        #     # temp_image = self.pixels[i].image
-        #     # self.pixels[i].image = running_image
-        #     # running_image = temp_image
+        #     self.pixels[i].update(block.movement_to_image[(x_y_1, x_y_2)])
+        #     temp_image = self.pixels[i].image
+        #     self.pixels[i].image = running_image
+        #     running_image = temp_image
         # self.pixels[-1].update(block.movement_to_image[(x_y_1, x_y_2)])
+
         self.eye = pygame.transform.rotate(self._eye, -90 * x_y_2[0])
+        self.eye_rect_1 = self.eye.get_rect()
+        self.eye_rect_2 = self.eye.get_rect()
+        if x_y_2 == LEFT:
+            self.eye_rect_1.topleft = self.rect.topleft
+            self.eye_rect_2.bottomleft = self.rect.bottomleft
+        if x_y_2 == RIGHT:
+            self.eye_rect_1.topright = self.rect.topright
+            self.eye_rect_2.bottomright = self.rect.bottomright
+        if x_y_2 == UP:
+            self.eye_rect_1.topleft = self.rect.topleft
+            self.eye_rect_2.topright = self.rect.topright
         if x_y_2 == DOWN:
-            self.eye = pygame.transform.rotate(self.eye, 180)
+            self.eye_rect_1.bottomleft = self.rect.bottomleft
+            self.eye_rect_2.bottomright = self.rect.bottomright
             
     def check_for_game_over(self, game_over):
-        if (self.head_x, self.head_y) in (
+        if (self.rect.topleft) in (
             block.rect.topleft for block in self.pixels[:-1]):
             return True
         if self.check_for_out_of_bounds(game_over):
@@ -151,10 +168,11 @@ class Snake(pygame.sprite.Sprite):
             
     def move(self, delta_x, delta_y):
         if (delta_x, delta_y) == (0, 0):
+            self.update()
             return
         self.head_x += delta_x
         self.head_y += delta_y
-        self.rect.topleft = (self.head_x, self.head_y)
+        self.rect.move_ip(delta_x, delta_y)
         new_block = Block(self.size, self.rect.topleft)
         self.pixels.append(new_block)
         if len(self.pixels) > self.length:
