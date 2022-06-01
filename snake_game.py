@@ -59,7 +59,7 @@ class SnakeGame:
         self.two_player = TwoPlayer_Snake(game=self)
 
     def get_random_fact(self, random_facts) -> tuple[str, tuple[int, int]]:
-        rand_x = (150, self.width - 150)
+        rand_x = (self.width / 2 - 250, self.width / 2 - 150)
         rand_y = (100, self.height - 100)
         rand_index = randrange(0, len(random_facts))
         return (random_facts[rand_index], (choice(rand_x), choice(rand_y)))
@@ -78,7 +78,9 @@ class SnakeGame:
         offset_1 = self.message_font.size(main_message)[0] / 2
         offset_2 = self.message_font.size(message)[0] / 2
 
-        rand_fact, rand_text, x_y = None, None, None
+        rand_fact, rand_fact_2, rand_text = None, None, None
+        rand_text_2, x_y_1, x_y_2 = None, None, None
+        last_time = 0
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -88,23 +90,38 @@ class SnakeGame:
                         self.end()
                     else:
                         return
-
-            if time.time() % 15 > 14.9:
-                rand_fact, rand_text, x_y = None, None, None
+            if time.time() - last_time >= 15:
+                rand_fact, rand_fact_2, rand_text = None, None, None
+                rand_text_2, x_y_1, x_y_2 = None, None, None
             if time.time() % 1 > 0.5:
                 text = self.message_font.render(main_message, True, colors[0])
             else:
                 text = self.message_font.render(main_message, True, colors[1])
             text_2 = self.message_font.render(message, True, self.white)
             if time.time() % 5 > 4.9:
-                rand_fact, x_y = self.get_random_fact(random_facts)
-                rand_text = self.option_font.render(rand_fact, True, self.white)
-            
+                rand_fact, x_y_1 = self.get_random_fact(random_facts)
+                if "\n" in rand_fact:
+                    i = rand_fact.index("\n")
+                    rand_fact_2 = rand_fact[i + 1:]
+                    rand_fact = rand_fact[:i]
+                    rand_text_2 = self.option_font.render(
+                        rand_fact_2, True, self.white
+                    )
+                    size = self.option_font.size(rand_fact_2)
+                    x_y_2 = (x_y_1[0] - size[0] / 6, x_y_1[1] + size[1])
+                    rand_text = self.option_font.render(rand_fact, True, self.white)
+                else:
+                    rand_text = self.option_font.render(rand_fact, True, self.white)
+                    rand_fact_2 = None
+                last_time = time.time()
+                
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(text, [x - offset_1, y - 40])
             self.game_display.blit(text_2, [x - offset_2, y])
             if rand_fact:
-                self.game_display.blit(rand_text, x_y)
+                self.game_display.blit(rand_text, x_y_1)
+                if rand_fact_2:
+                    self.game_display.blit(rand_text_2, x_y_2)
             pygame.display.update()
 
     def prompt_name_screen(self, message):
