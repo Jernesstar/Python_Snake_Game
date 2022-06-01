@@ -131,9 +131,10 @@ class Snake(pygame.sprite.Sprite):
         #     running_image = temp_image
         # self.pixels[-1].image = block.movement_to_image[(x_y_1, x_y_1)]
 
+        # Rotate snake eye according to the current velocity
         self.eye = pygame.transform.rotate(self._eye, -90 * x_y_2[0])
-        self.eye_rect_1 = self.eye.get_rect()
-        self.eye_rect_2 = self.eye.get_rect()
+        self.eye = pygame.transform.rotate(self._eye, 90 * (x_y_2[1] + 1))
+
         if x_y_2 == LEFT:
             self.eye_rect_1.topleft = self.rect.topleft
             self.eye_rect_2.bottomleft = self.rect.bottomleft
