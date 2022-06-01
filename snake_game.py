@@ -80,7 +80,6 @@ class SnakeGame:
 
         rand_fact, rand_fact_2, rand_text = None, None, None
         rand_text_2, x_y_1, x_y_2 = None, None, None
-        last_time = 0
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -90,15 +89,12 @@ class SnakeGame:
                         self.end()
                     else:
                         return
-            if time.time() - last_time >= 15:
-                rand_fact, rand_fact_2, rand_text = None, None, None
-                rand_text_2, x_y_1, x_y_2 = None, None, None
             if time.time() % 1 > 0.5:
                 text = self.message_font.render(main_message, True, colors[0])
             else:
                 text = self.message_font.render(main_message, True, colors[1])
             text_2 = self.message_font.render(message, True, self.white)
-            if time.time() % 5 > 4.9:
+            if round(time.time() % 5, 2) == 4.99:
                 rand_fact, x_y_1 = self.get_random_fact(random_facts)
                 if "\n" in rand_fact:
                     i = rand_fact.index("\n")

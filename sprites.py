@@ -1,7 +1,6 @@
 from enum import Enum
 import os
 from pathlib import Path
-from functools import singledispatchmethod
 
 import numpy as np
 
