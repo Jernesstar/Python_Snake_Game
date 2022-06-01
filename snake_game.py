@@ -1,8 +1,13 @@
+import os
+from pathlib import Path
+from random import choice, randrange
 import time
+import json
 
 import pygame
 from pygame import (
-    QUIT, KEYDOWN, K_BACKSPACE, K_ESCAPE, K_SPACE, K_RETURN, K_DELETE,
+    QUIT, KEYDOWN, K_BACKSPACE, K_ESCAPE, 
+    K_SPACE, K_RETURN, K_DELETE,
     K_UP, K_DOWN, K_LEFT, K_RIGHT
 )
 
@@ -45,7 +50,7 @@ class SnakeGame:
         self.square_size = size
         self.width += self.width % size
         self.height += self.height % size
-        self.game_display = pygame.display.set_mode((self.width, self.height))
+        self.game_display = pygame.display.set_mode(self.dimensions)
         background = pygame.image.load("resources\\start_bg.png").convert()
         self.background = pygame.transform.scale(background, self.dimensions)
         self.snake_1 = Snake(self, "", Snake.Controls.KEYS)
@@ -53,15 +58,27 @@ class SnakeGame:
         self.classic_snake = OnePlayer_Classic_Snake(game=self)
         self.two_player = TwoPlayer_Snake(game=self)
 
+    def get_random_fact(self, random_facts) -> tuple[str, tuple[int, int]]:
+        rand_x = (150, self.width - 150)
+        rand_y = (100, self.height - 100)
+        rand_index = randrange(0, len(random_facts))
+        return (random_facts[rand_index], (choice(rand_x), choice(rand_y)))
+
     def start_screen(self):
+        random_facts: list
+        resources_path = Path(os.path.split(__file__)[0]) / "resources"
+        with open(resources_path / "random_facts.json") as json_file:
+            random_facts = json.loads(json_file.read())
+
         main_message = "Snake 2.0"
-        messages = ["Press any key to continue", "Press any key to continue_"]
+        message = "Press any key to continue"
         colors = [self.black, self.white]
         x = self.width / 2
         y = self.height / 2
         offset_1 = self.message_font.size(main_message)[0] / 2
-        offset_2 = self.message_font.size(messages[0])[0] / 2
-        
+        offset_2 = self.message_font.size(message)[0] / 2
+
+        rand_fact, rand_text, x_y = None, None, None
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -71,15 +88,23 @@ class SnakeGame:
                         self.end()
                     else:
                         return
-            text = self.message_font.render(main_message, True, colors[0])
-            text_2 = self.message_font.render(messages[0], True, self.white)
 
+            if time.time() % 15 > 14.9:
+                rand_fact, rand_text, x_y = None, None, None
+            if time.time() % 1 > 0.5:
+                text = self.message_font.render(main_message, True, colors[0])
+            else:
+                text = self.message_font.render(main_message, True, colors[1])
+            text_2 = self.message_font.render(message, True, self.white)
+            if time.time() % 5 > 4.9:
+                rand_fact, x_y = self.get_random_fact(random_facts)
+                rand_text = self.option_font.render(rand_fact, True, self.white)
+            
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(text, [x - offset_1, y - 40])
             self.game_display.blit(text_2, [x - offset_2, y])
-            self.clock.tick(2)
-            colors.reverse()
-            messages.reverse()
+            if rand_fact:
+                self.game_display.blit(rand_text, x_y)
             pygame.display.update()
 
     def prompt_name_screen(self, message):
