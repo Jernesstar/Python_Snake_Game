@@ -45,7 +45,7 @@ class Block(pygame.sprite.Sprite):
             pygame.image.load(path / "block_up_right.png").convert_alpha()
         ]
         self.images = [
-            pygame.transform.scale(im, (size, size)) for im in images
+            pygame.transform.scale(image, (size, size)) for image in images
         ]
         self.movement_to_image = {
             (LEFT, UP): self.images[3],
@@ -64,9 +64,6 @@ class Block(pygame.sprite.Sprite):
         self.image = self.images[2]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-
-    def update(self, new_image: pygame.Surface):
-        self.image = new_image
     
         
 class Snake(pygame.sprite.Sprite):
@@ -77,22 +74,21 @@ class Snake(pygame.sprite.Sprite):
 
     score, size, length = 0, 10, 3
     head_x, head_y = 250, 250
+    name = ""
 
-    def __init__(self, game, name: str, controls=Controls.KEYS):
+    def __init__(self, game, controls=Controls.KEYS):
         pygame.sprite.Sprite.__init__(self)
-        pos, width_height = (self.head_x, self.head_y), (self.size, self.size)
+        self.size = game.square_size
+        size = self.size
+        pos, width_height = (self.head_x, self.head_y), (size, size)
         self.rect = pygame.rect.Rect(pos, width_height)
-        self.name = name.strip()
         self.display_width = game.width
         self.display_height = game.height
         self.controls = controls
-        self.size = game.square_size
         self.pixels: list[Block] = []
         path = Path(os.path.split(__file__)[0]) / "resources"
         self._eye = pygame.image.load(path / "snake_eye_open.png").convert_alpha()
-        self._eye = pygame.transform.scale(
-            self._eye, (self.size / 2.5, self.size / 2.5)
-        )
+        self._eye = pygame.transform.scale(self._eye, (size / 2.5, size / 2.5))
         self.eye = self._eye
         self.eye_rect_1 = self.eye.get_rect()
         self.eye_rect_2 = self.eye.get_rect()
@@ -116,22 +112,24 @@ class Snake(pygame.sprite.Sprite):
         vector_1: np.ndarray = vector_behind_1 - vector_behind_2
         vector_2: np.ndarray = head_vector - vector_behind_1
 
-        vector_1 /= vector_1
-        vector_2 /= vector_2
+        vector_1 /= abs(vector_1) * -1
+        vector_2 /= abs(vector_2) * -1
+        vector_1 *= -1
+        vector_2 *= -1
 
         vector_1 = np.nan_to_num(vector_1, nan=0)
         vector_2 = np.nan_to_num(vector_2, nan=0)
+
         x_y_1 = (int(vector_1[0]), int(vector_1[1]))
         x_y_2 = (int(vector_2[0]), int(vector_2[1]))
 
         # block = Block(1, (1, 1))
         # running_image = block.movement_to_image[(x_y_1, x_y_2)]
         # for i in reversed(range(len(self.pixels) - 1)): # Avoids head
-        #     self.pixels[i].update(block.movement_to_image[(x_y_1, x_y_2)])
         #     temp_image = self.pixels[i].image
         #     self.pixels[i].image = running_image
         #     running_image = temp_image
-        # self.pixels[-1].update(block.movement_to_image[(x_y_1, x_y_2)])
+        # self.pixels[-1].image = block.movement_to_image[(x_y_1, x_y_1)]
 
         self.eye = pygame.transform.rotate(self._eye, -90 * x_y_2[0])
         self.eye_rect_1 = self.eye.get_rect()
@@ -148,7 +146,7 @@ class Snake(pygame.sprite.Sprite):
         if x_y_2 == DOWN:
             self.eye_rect_1.bottomleft = self.rect.bottomleft
             self.eye_rect_2.bottomright = self.rect.bottomright
-            
+        
     def check_for_game_over(self, game_over):
         if (self.rect.topleft) in (
             block.rect.topleft for block in self.pixels[:-1]):

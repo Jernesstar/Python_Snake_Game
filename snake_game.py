@@ -53,8 +53,8 @@ class SnakeGame:
         self.game_display = pygame.display.set_mode(self.dimensions)
         background = pygame.image.load("resources\\start_bg.png").convert()
         self.background = pygame.transform.scale(background, self.dimensions)
-        self.snake_1 = Snake(self, "", Snake.Controls.KEYS)
-        self.snake_2 = Snake(self, "", Snake.Controls.WASD)
+        self.snake_1 = Snake(self, Snake.Controls.KEYS)
+        self.snake_2 = Snake(self, Snake.Controls.WASD)
         self.classic_snake = OnePlayer_Classic_Snake(game=self)
         self.two_player = TwoPlayer_Snake(game=self)
 
