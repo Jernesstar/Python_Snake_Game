@@ -13,13 +13,12 @@ make this a revamped game
 GUI and controls
 ----------------
 The movement is very clean and the GUI is very intuitive, making it easy to switch between the numerous exciting game modes  
-Each individual game mode itself features great graphics and responsive controls, making for a great gaming experience
-
+Each individual game mode itself features great graphics and responsive controls, making for a great gaming experience  
+<br>
 # How To Install  
-
 Creating virtual environment
-----------------------------
-Creating virtual environment name ".env" using venv
+-------------------------------
+To create a virtual environment named ".env" using venv  
 In your command line of choice, run
 ```
 python -m venv .env
@@ -56,4 +55,4 @@ To play the game, run:
 .env\Scripts\python .\main.py
 ```
 
-[Python_Snake_Game](https://github/Jernesstar/Python_Snake_Game "Home Page")
+[Python_Snake_Game](https://github.com/Jernesstar/Python_Snake_Game "Home Page")
