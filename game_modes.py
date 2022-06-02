@@ -4,8 +4,6 @@ import pygame
 from pygame import (
     QUIT, KEYDOWN,
     K_ESCAPE, K_RETURN, K_SPACE,
-    K_UP, K_DOWN, K_LEFT, K_RIGHT, 
-    K_w, K_s, K_a, K_d
 )
 from pygame import sprite
 
@@ -77,8 +75,8 @@ class Game_Mode:
     def draw_snake(self):
         for block in self.snake_1.pixels:
             self.game_display.blit(block.image, block.rect.topleft) 
-        pos_1 = self.snake_1.eye_rect_1
-        pos_2 = self.snake_1.eye_rect_2
+        pos_1 = self.snake_1.eye_rect_1.topleft
+        pos_2 = self.snake_1.eye_rect_2.topleft
         self.game_display.blit(self.snake_1.eye, pos_1)
         self.game_display.blit(self.snake_1.eye, pos_2)
 
@@ -186,7 +184,7 @@ class OnePlayer_Classic_Snake(Game_Mode):
             self.spawn_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
-            Apple(self.size, self.rand_x_y())
+            self.spawn_fruits(1)
             speed = 10
         while game_over == False:
             for event in pygame.event.get():
@@ -244,12 +242,12 @@ class TwoPlayer_Snake(Game_Mode):
 
     def draw_snake(self):
         super().draw_snake()
-        for x, y, in self.snake_2.pixels:
-            pygame.draw.rect(
-                self.game_display, 
-                self.red,
-                [x, y, self.snake_2.size, self.snake_2.size]
-            )
+        for block in self.snake_2.pixels:
+            self.game_display.blit(block.image, block.rect.topleft)
+        pos_1 = self.snake_2.eye_rect_1.topleft
+        pos_2 = self.snake_2.eye_rect_2.topleft
+        self.game_display.blit(self.snake_2.eye, pos_1)
+        self.game_display.blit(self.snake_2.eye, pos_2)
 
     def show_scores(self):
         super().show_scores()
@@ -303,6 +301,9 @@ class TwoPlayer_Snake(Game_Mode):
             self.display_width / 2 + 4 * self.snake_2.size, 
             self.display_height / 2
         )
+        self.snake_1.rect.topleft = (self.snake_1.head_x, self.snake_1.head_y)
+        self.snake_2.rect.topleft = (self.snake_2.head_x, self.snake_2.head_y)
+        
         for i in range(1, self.snake_1.length + 1):
             x = self.snake_1.head_x - ((self.snake_1.length - i) * self.size)
             block = Block(self.size, (x, self.display_height / 2))
@@ -318,7 +319,7 @@ class TwoPlayer_Snake(Game_Mode):
             self.spawn_fruits(options["fruit_count"])
             speed = options["speed"]
         except:
-            Apple(self.size)
+            self.spawn_fruits(1)
             speed = 10
         while (game_over_1, game_over_2) == (False, False):
             for event in pygame.event.get():
@@ -329,9 +330,9 @@ class TwoPlayer_Snake(Game_Mode):
                         return (True, False)
                     if event.key == K_RETURN:
                         paused = self.check_for_pause(paused, event)
-                    (delta_x_1, delta_y_1) = self.snake_1.directions(
+                    (delta_x_1, delta_y_1) = self.snake_1.get_directions_keys(
                         event, delta_x_1, delta_y_1)
-                    (delta_x_2, delta_y_2) = self.snake_2.directions(
+                    (delta_x_2, delta_y_2) = self.snake_2.get_directions_wasd(
                         event, delta_x_2, delta_y_2)
             if paused:
                 see_menu = self.pause_screen()
