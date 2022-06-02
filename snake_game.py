@@ -80,7 +80,6 @@ class SnakeGame:
 
         rand_fact, rand_fact_2, rand_text = None, None, None
         rand_text_2, x_y_1, x_y_2 = None, None, None
-        last_time = 0
         while True:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -90,15 +89,12 @@ class SnakeGame:
                         self.end()
                     else:
                         return
-            if time.time() - last_time >= 15:
-                rand_fact, rand_fact_2, rand_text = None, None, None
-                rand_text_2, x_y_1, x_y_2 = None, None, None
             if time.time() % 1 > 0.5:
                 text = self.message_font.render(main_message, True, colors[0])
             else:
                 text = self.message_font.render(main_message, True, colors[1])
             text_2 = self.message_font.render(message, True, self.white)
-            if time.time() % 5 > 4.9:
+            if round(time.time() % 5, 2) == 4.99:
                 rand_fact, x_y_1 = self.get_random_fact(random_facts)
                 if "\n" in rand_fact:
                     i = rand_fact.index("\n")
@@ -108,12 +104,11 @@ class SnakeGame:
                         rand_fact_2, True, self.white
                     )
                     size = self.option_font.size(rand_fact_2)
-                    x_y_2 = (x_y_1[0] - size[0] / 6, x_y_1[1] + size[1])
+                    x_y_2 = ((x_y_1[0] / 2) - size[0] / 2, x_y_1[1] + size[1])
                     rand_text = self.option_font.render(rand_fact, True, self.white)
                 else:
                     rand_text = self.option_font.render(rand_fact, True, self.white)
                     rand_fact_2 = None
-                last_time = time.time()
                 
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(text, [x - offset_1, y - 40])
@@ -355,17 +350,31 @@ class SnakeGame:
         }
 
         self.start_screen()
-        name_1 = self.prompt_name_screen("Enter your player name")
-        self.snake_1.name = name_1
 
         while stop == False:
             if see_menu:
                 (game_mode, options) = self.menu_screen(
                     game_mode, options_1, options_2)
+                    
+            if game_mode == self.two_player and self.snake_1.name == "" and \
+            self.snake_2.name == "":
+                while name_1 == name_2 or name_1 == "":
+                    name_1 = self.prompt_name_screen("Enter player 1 name")
+                    self.snake_1.name = name_1   
+                while name_2 == name_1 or name_2 == "":
+                    name_2 = self.prompt_name_screen("Enter player 2 name")
+                self.snake_2.name = name_2
+
+            if game_mode == self.classic_snake and self.snake_1.name == "":
+                while name_2 == name_1 or name_1 == "":
+                    name_1 = self.prompt_name_screen("Enter your player name")
+                self.snake_1.name = name_1
+
             if game_mode == self.two_player and self.snake_2.name == "":
                 while name_2 == name_1 or name_2 == "":
                     name_2 = self.prompt_name_screen("Enter player 2 name")
                 self.snake_2.name = name_2
+
             self.snake_1.reset()
             self.snake_2.reset()
             (stop, see_menu) = game_mode.run(options=options)

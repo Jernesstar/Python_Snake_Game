@@ -1,7 +1,6 @@
 from enum import Enum
 import os
 from pathlib import Path
-from functools import singledispatchmethod
 
 import numpy as np
 
@@ -199,10 +198,9 @@ class Snake(pygame.sprite.Sprite):
             if event.key in (K_LEFT, K_RIGHT):
                 if current_delta_x == self.size:
                     delta_x = self.size if event.key == K_RIGHT else 0
-                    delta_y = 0
                 if current_delta_x == -self.size:
                     delta_x = self.size if event.key == K_LEFT else 0
-                    delta_y = 0
+                delta_y = 0
             elif event.key in (K_UP, K_DOWN):
                 if current_delta_y == 0:
                     delta_x = 0
@@ -234,11 +232,15 @@ class Snake(pygame.sprite.Sprite):
             self.pixels[-1].rect.top - self.pixels[-2].rect.top
         )
         if len(self.pixels) == self.length and (delta_x, delta_y) == (0, 0):
-            if current_delta_x == self.size:
-                delta_x = self.size if event.key == K_d else 0
-            if current_delta_x == -self.size:
-                delta_x = self.size if event.key == K_a else 0
-            delta_y = -self.size if event.key == K_w else self.size
+            if event.key in (K_a, K_d):    
+                if current_delta_x == self.size:
+                    delta_x = self.size if event.key == K_d else 0
+                if current_delta_x == -self.size:
+                    delta_x = -self.size if event.key == K_a else 0
+            if event.key in (K_w, K_s):
+                if current_delta_y == 0:
+                    delta_x = 0
+                    delta_y = -self.size if event.key == K_w else self.size
         if event.key in (K_a, K_d):
             """Snake is going up or down"""
             if current_delta_x == 0:
