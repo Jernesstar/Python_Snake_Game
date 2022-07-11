@@ -1,4 +1,6 @@
 from random import randrange
+from pathlib import Path
+import os
 
 import pygame
 from pygame import (
@@ -10,6 +12,10 @@ from pygame import sprite
 from sprites import Block, Snake, Apple
 
 pygame.init()
+
+resources_path = Path(
+        os.path.split(os.path.split(__file__)[0])[0]
+    ) / "resources"
 
 class Game_Mode:
 
@@ -24,8 +30,9 @@ class Game_Mode:
     light_green = (0, 250, 0)
     dark_green = (0, 130, 0)
     
-    message_font = pygame.font.Font("resources\\pixel_font.ttf", 25)
-    score_font = pygame.font.Font("resources\\pixel_font.ttf", 20)
+
+    message_font = pygame.font.Font(f"{resources_path}\\pixel_font.ttf", 25)
+    score_font = pygame.font.Font(f"{resources_path}\\pixel_font.ttf", 20)
 
     def __init__(self, game):
         self.snake_1 = game.snake_1

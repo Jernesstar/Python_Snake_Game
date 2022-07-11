@@ -16,6 +16,9 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
+resources_path = Path(
+        os.path.split(os.path.split(__file__)[0])[0]
+    ) / "resources"
 
 class Apple(pygame.sprite.Sprite):
 
@@ -23,7 +26,7 @@ class Apple(pygame.sprite.Sprite):
 
     def __init__(self, size, position: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self, self.containers)
-        image = pygame.image.load("resources\\apple.gif").convert()
+        image = pygame.image.load(f"{resources_path}\\apple.gif").convert()
         self.image = pygame.transform.scale(image, (size, size))
         self.rect = self.image.get_rect()
         self.rect.topleft = position
@@ -35,7 +38,7 @@ class Block(pygame.sprite.Sprite):
 
     def __init__(self, size, pos: tuple[int, int]):
         pygame.sprite.Sprite.__init__(self)
-        path = Path(os.path.split(__file__)[0]) / "resources"
+        path = resources_path
         images = [
             pygame.image.load(path / "block_left_up.png").convert_alpha(),
             pygame.image.load(path / "block_right_up.png").convert_alpha(),
@@ -88,7 +91,7 @@ class Snake(pygame.sprite.Sprite):
         self.display_height = game.height
         self.controls = controls
         self.pixels: list[Block] = []
-        path = Path(os.path.split(__file__)[0]) / "resources"
+        path = resources_path
         self._eye = pygame.image.load(path / "snake_eye_open.png").convert_alpha()
         self._eye = pygame.transform.scale(self._eye, (size / 2.5, size / 2.5))
         self.eye = self._eye

@@ -52,7 +52,7 @@ python -m pip install -r .\requirements.txt
 
 To play the game, run:
 ```
-.env\Scripts\python .\main.py
+.env\Scripts\python .\src\main.py
 ```
 
 [Python_Snake_Game](https://github.com/Jernesstar/Python_Snake_Game "Home Page")

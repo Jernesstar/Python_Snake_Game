@@ -21,6 +21,9 @@ from game_modes import (
 pygame.init()
 pygame.display.set_caption("Snake Game 2.0")
 
+resources_path = Path(
+        os.path.split(os.path.split(__file__)[0])[0]
+    ) / "resources"
 
 class SnakeGame:
 
@@ -34,8 +37,8 @@ class SnakeGame:
     white = (255, 255, 255)
     grey = (160, 160, 160)
 
-    message_font = pygame.font.Font("resources\\pixel_font.ttf", 40)
-    option_font = pygame.font.Font("resources\\pixel_font.ttf", 30)
+    message_font = pygame.font.Font(f"{resources_path}\\pixel_font.ttf", 40)
+    option_font = pygame.font.Font(f"{resources_path}\\pixel_font.ttf", 30)
     
     snake_1 = None
     snake_2 = None
@@ -51,7 +54,8 @@ class SnakeGame:
         self.width += self.width % size
         self.height += self.height % size
         self.game_display = pygame.display.set_mode(self.dimensions)
-        background = pygame.image.load("resources\\start_bg.png").convert()
+        background = pygame.image.load(
+            f"{resources_path}\\start_bg.png").convert()
         self.background = pygame.transform.scale(background, self.dimensions)
         self.snake_1 = Snake(self, Snake.Controls.KEYS)
         self.snake_2 = Snake(self, Snake.Controls.WASD)
@@ -66,7 +70,6 @@ class SnakeGame:
 
     def start_screen(self):
         random_facts: list
-        resources_path = Path(os.path.split(__file__)[0]) / "resources"
         with open(resources_path / "random_facts.json") as json_file:
             random_facts = json.loads(json_file.read())
 
