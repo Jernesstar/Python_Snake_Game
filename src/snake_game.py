@@ -112,7 +112,7 @@ class SnakeGame:
                 else:
                     rand_text = self.option_font.render(rand_fact, True, self.white)
                     rand_fact_2 = None
-                
+
             self.game_display.blit(self.background, [0, 0])
             self.game_display.blit(text, [x - offset_1, y - 40])
             self.game_display.blit(text_2, [x - offset_2, y])

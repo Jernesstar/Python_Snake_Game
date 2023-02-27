@@ -117,10 +117,8 @@ class Snake(pygame.sprite.Sprite):
         vector_1: np.ndarray = vector_behind_1 - vector_behind_2
         vector_2: np.ndarray = head_vector - vector_behind_1
 
-        vector_1 /= abs(vector_1) * -1
-        vector_2 /= abs(vector_2) * -1
-        vector_1 *= -1
-        vector_2 *= -1
+        vector_1 /= abs(vector_1)
+        vector_2 /= abs(vector_2)
         vector_1 = np.nan_to_num(vector_1, nan=0)
         vector_2 = np.nan_to_num(vector_2, nan=0)
 
